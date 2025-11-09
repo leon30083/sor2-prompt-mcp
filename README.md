@@ -57,6 +57,7 @@ python -m src.sora2_agent --text_file tests/测试文稿.md --seconds 4 > tests/
 - `docs/MCP.md`：协议与使用说明。
 - `docs/DEVELOPMENT.md`：开发文档（架构、扩展、测试）。
 - `docs/QUICKSTART.md`：5 分钟快速上手。
+- `docs/openspec.md` / `docs/openspec_generated.md`：OpenSpec手写版与工具生成版。
 - `tests/`：示例与用例。
 
 ## 常见问题
