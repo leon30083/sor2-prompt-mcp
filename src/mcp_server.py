@@ -35,6 +35,32 @@ def list_tools_ndjson() -> Dict[str, Any]:
                     },
                     "required": ["text"]
                 }
+            },
+            {
+                "id": "/sora2/agent.generate.auto",
+                "description": "自动模式：在工具内自动判定旁白/对话并生成 shots",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string"},
+                        "default_seconds": {"type": "string"},
+                        "narration_limit": {"type": "string"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "id": "/sora2/agent.generate.narration",
+                "description": "强制旁白模式：忽略对话线索，按旁白生成 shots",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string"},
+                        "default_seconds": {"type": "string"},
+                        "narration_limit": {"type": "string"}
+                    },
+                    "required": ["text"]
+                }
             }
         ]
     }
@@ -55,6 +81,34 @@ def tools_list() -> Dict[str, Any]:
                         "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
                         "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
                         "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "name": "sora2.agent.generate.auto",
+                "title": "Sora2 指令生成（自动模式）",
+                "description": "自动判定旁白/对话生成 shots",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string", "description": "中文剧本文本"},
+                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "name": "sora2.agent.generate.narration",
+                "title": "Sora2 指令生成（强制旁白）",
+                "description": "忽略对话线索，按旁白生成 shots",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string", "description": "中文剧本文本"},
+                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
+                        "narration_limit": {"type": "string", "description": "旁白镜头数量上限，默认 3"}
                     },
                     "required": ["text"]
                 }
@@ -121,6 +175,28 @@ def handle_request(req: Dict[str, Any]) -> Dict[str, Any]:
             return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
         if "text" not in payload:
             return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        res = tool_generate(payload)
+        if isinstance(res, dict) and "error" in res:
+            return {"ok": False, "error": res["error"]}
+        return {"ok": True, "data": res}
+    elif tool == "/sora2/agent.generate.auto":
+        if not isinstance(payload, dict):
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
+        if "text" not in payload:
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        payload = dict(payload)
+        payload["mode"] = "auto"
+        res = tool_generate(payload)
+        if isinstance(res, dict) and "error" in res:
+            return {"ok": False, "error": res["error"]}
+        return {"ok": True, "data": res}
+    elif tool == "/sora2/agent.generate.narration":
+        if not isinstance(payload, dict):
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
+        if "text" not in payload:
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        payload = dict(payload)
+        payload["mode"] = "narration"
         res = tool_generate(payload)
         if isinstance(res, dict) and "error" in res:
             return {"ok": False, "error": res["error"]}
@@ -206,6 +282,26 @@ def handle_jsonrpc(req: Dict[str, Any]) -> Dict[str, Any]:
                     msg = err.get("message", "工具执行错误") if isinstance(err, dict) else str(err)
                     return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": msg}], "isError": True})
                 # 将结构化结果以文本形式返回，兼容 MCP content
+                text_out = json.dumps(res, ensure_ascii=False)
+                return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
+            if name == "sora2.agent.generate.auto":
+                if not isinstance(arguments, dict):
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "arguments 必须为对象")
+                if "text" not in arguments:
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+                arguments = dict(arguments)
+                arguments["mode"] = "auto"
+                res = tool_generate(arguments)
+                text_out = json.dumps(res, ensure_ascii=False)
+                return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
+            if name == "sora2.agent.generate.narration":
+                if not isinstance(arguments, dict):
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "arguments 必须为对象")
+                if "text" not in arguments:
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+                arguments = dict(arguments)
+                arguments["mode"] = "narration"
+                res = tool_generate(arguments)
                 text_out = json.dumps(res, ensure_ascii=False)
                 return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
 

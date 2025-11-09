@@ -518,6 +518,23 @@ def detect_mode(text: str) -> str:
                 return "dialogue"
     return "narration"
 
+# 基础分句（顶层可复用）
+def split_sentences_basic(t: str) -> List[str]:
+    parts = re.split(r"[。！？；…\n]+", t)
+    return [p.strip() for p in parts if p and p.strip()]
+
+# 文本解析摘要：估算对话条数与旁白句数
+def summarize_text(text: str) -> Dict:
+    t = normalize_text(text)
+    sentences = split_sentences_basic(t)
+    candidates = find_candidates(t)
+    dialogues = extract_dialogues(t, candidates)
+    return {
+        "total_sentences": len(sentences),
+        "dialogue_count": len(dialogues),
+        "narration_count": max(0, len(sentences) - len(dialogues))
+    }
+
 
 def cli():
     import argparse, sys

@@ -1,6 +1,6 @@
 import json
 from typing import Dict
-from .sora2_agent import generate_sora2_instructions, to_json, detect_mode
+from .sora2_agent import generate_sora2_instructions, to_json, detect_mode, summarize_text
 
 
 def generate(payload: Dict) -> Dict:
@@ -25,7 +25,15 @@ def generate(payload: Dict) -> Dict:
         return {"error": {"code": "INVALID_INPUT", "message": "text 不能为空"}}
     chosen_mode = "narration" if mode == "narration" else detect_mode(text)
     shots = generate_sora2_instructions(text, default_seconds, narration_limit, mode)
-    return {"shots": shots, "meta": {"chosen_mode": chosen_mode, "shots_count": len(shots)}}
+    summary = summarize_text(text)
+    return {
+        "shots": shots,
+        "meta": {
+            "chosen_mode": chosen_mode,
+            "shots_count": len(shots),
+            "parse_summary": summary
+        }
+    }
 
 
 if __name__ == "__main__":
