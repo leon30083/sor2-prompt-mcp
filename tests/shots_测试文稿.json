@@ -1,0 +1,44 @@
+{
+  "shots": [
+    {
+      "shot_id": "shot_01_line",
+      "description": "近景特写孙悟空，他说：齐天大圣",
+      "api_call": {"seconds": "4"},
+      "cinematography": "Medium close-up (MCU) on '孙悟空', shallow depth of field",
+      "performance": "Neutral expression, steady delivery",
+      "dialogue": {"character": "孙悟空", "line": "齐天大圣", "tone": "neutral"}
+    },
+    {
+      "shot_id": "shot_02_line",
+      "description": "近景特写孙悟空，他说：蟠桃",
+      "api_call": {"seconds": "4"},
+      "cinematography": "Medium close-up (MCU) on '孙悟空', shallow depth of field",
+      "performance": "Neutral expression, steady delivery",
+      "dialogue": {"character": "孙悟空", "line": "蟠桃", "tone": "neutral"}
+    },
+    {
+      "shot_id": "shot_03_line",
+      "description": "近景特写孙悟空，他说：这有什么难的？",
+      "api_call": {"seconds": "4"},
+      "cinematography": "Medium close-up (MCU) on '孙悟空', shallow depth of field",
+      "performance": "Neutral expression, steady delivery",
+      "dialogue": {"character": "孙悟空", "line": "这有什么难的？", "tone": "neutral"}
+    },
+    {
+      "shot_id": "shot_04_line",
+      "description": "近景特写孙悟空，他说：齐天大圣到此一游",
+      "api_call": {"seconds": "4"},
+      "cinematography": "Medium close-up (MCU) on '孙悟空', shallow depth of field",
+      "performance": "Neutral expression, steady delivery",
+      "dialogue": {"character": "孙悟空", "line": "齐天大圣到此一游", "tone": "neutral"}
+    },
+    {
+      "shot_id": "shot_05_line",
+      "description": "近景特写孙悟空，他说：天柱",
+      "api_call": {"seconds": "4"},
+      "cinematography": "Medium close-up (MCU) on '孙悟空', shallow depth of field",
+      "performance": "Neutral expression, steady delivery",
+      "dialogue": {"character": "孙悟空", "line": "天柱", "tone": "neutral"}
+    }
+  ]
+}
