@@ -137,3 +137,28 @@ sequenceDiagram
 - “陈晓低声道：“别动。”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
 - “画外音：“夜色深沉。”” → `.auto`（含引号），`chosen_mode=dialogue`，`shots_count≈1`
 - “雨夜里，路灯残影在水面摇晃。” → `.narration`，`chosen_mode=narration`，`shots_count≈1~3（依限额）`
+
+---
+
+导演级优化（结合《核心知识库：Sora 2 导演级JSON结构与词汇》）
+
+必须遵守（不会破坏上游结构的增强）：
+- 镜头（shots）是原子任务，严格“故事板”视角输出，不写整段剧本。
+- 说话镜头优先使用 `Close-up (CU)` 或 `Medium close-up (MCU)`，利于口型识别；并在 `performance` 中采用“节拍（Beats）”描述。
+- `cinematography` 选词使用专业词汇库：`OTS`、`ECU`、`Tracking shot`、`Steadicam shot`、`High angle`、`Low angle`、`Handheld shaky cam`、`Slow dolly-in` 等。
+- 灯光/氛围：`low key lighting`、`volumetric light`、`warm candlelight`、`neon signs reflecting in puddles` 等词可自然融入 `cinematography`。
+- 语气 `tone` 中允许包含口音与情绪（如 `hushed`, `urgent`, `deadpan`, `whining`），与知识库建议一致。
+- 旁白（VO）镜头的 `cinematography` 应含 `B-roll / montage under narration (VO)`，并可加入过渡（如 `soft dissolve transitions`）。
+- 音效与音乐（如需）：若上游允许可在 JSON 中加可选 `audio` 字段；若不允许，请将音效意图自然融入 `cinematography` 或 `performance` 文本中。
+
+示例片段（导演级增强示意）：
+[
+  {
+    "shot_id": "shot_01_tang_closeup",
+    "description": "汤小团特写，他猛然瞪大眼睛，压低声音急促说：我们又穿越了！",
+    "api_call": { "seconds": "4" },
+    "cinematography": "Close-up (CU) on '汤小团', low key lighting, Slow dolly-in",
+    "performance": "Beat 1: Eyes widen; Beat 2: Urgent whisper, shoulders lean in",
+    "dialogue": { "character": "汤小团", "line": "我们又穿越了！", "tone": "urgent, hushed" }
+  }
+]
