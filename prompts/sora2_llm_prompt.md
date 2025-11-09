@@ -15,7 +15,7 @@
       "line": "中文台词",
       "tone": "英文语气，如 rapid, hushed, urgent"
     }
-  }
+ }
 ]
 
 生成规则：
@@ -60,3 +60,80 @@
     "dialogue": { "character": "孟虎", "line": "这体验也太真实了吧？差评！", "tone": "whining, complaining" }
   }
 ]
+
+---
+
+MCP 集成（可用工具时优先使用，无法使用时保持上述 JSON 直出作为回退）
+
+工具选择策略（标准）：
+- 默认调用并列工具 `sora2.agent.generate.auto`（不确定文本一律 .auto）。
+- 明确旁白需求（全 VO）时调用 `sora2.agent.generate.narration` 并传 `narration_limit`。
+- 不在并列工具上设置 `mode` 字段，以减少推理分支。
+
+调用参数：
+- `.auto`：`{ text: string, default_seconds?: string }`
+- `.narration`：`{ text: string, default_seconds?: string, narration_limit?: string }`
+
+返回解析：
+- 工具返回结构为 `{ shots: Shot[], meta: { chosen_mode: "dialogue"|"narration", shots_count: number, parse_summary: { total_sentences: number, dialogue_count: number, narration_count: number } } }`。
+- 使用 `meta` 驱动并行拼接；不要在此提示词中自行计算拼接标签（由上游统一根据 `meta` 注入）。
+
+JSON-RPC 调用示例（仅供参考，不要在最终输出中打印）：
+```
+{"jsonrpc":"2.0","id":"1","method":"tools/call","params":{"name":"sora2.agent.generate.auto","arguments":{"text":"张三说：“快跑！”","default_seconds":"3"}}}
+```
+```
+{"jsonrpc":"2.0","id":"2","method":"tools/call","params":{"name":"sora2.agent.generate.narration","arguments":{"text":"夜色浓重，风声在巷口回旋。","narration_limit":"3"}}}
+```
+
+NDJSON 调用示例（仅供参考，不要在最终输出中打印）：
+```
+{"type":"call_tool","tool":"/sora2/agent.generate.auto","input":{"text":"王强压低声音说：“别出声。”","default_seconds":"3"}}
+```
+```
+{"type":"call_tool","tool":"/sora2/agent.generate.narration","input":{"text":"雨夜里，路灯残影在水面摇晃。","narration_limit":"3"}}
+```
+
+流程（Mermaid，暗黑主题可读）：
+```mermaid
+flowchart TD
+  A[收到文本] --> B{是否明确要求旁白?}
+  B -- 是 --> C[调用 .narration]
+  B -- 否/不确定 --> D[调用 .auto]
+  C --> E[返回 shots + meta]
+  D --> E[返回 shots + meta]
+  E --> F{meta.chosen_mode}
+  F -- narration --> G[上游据 meta 计算 VO 并行拼接]
+  F -- dialogue --> H[上游据 meta 计算对话并行拼接]
+  G --> I[输出成片/后处理]
+  H --> I[输出成片/后处理]
+```
+
+时序（Mermaid，暗黑主题可读）：
+```mermaid
+sequenceDiagram
+  participant L as LLM
+  participant M as MCP Server
+  participant T as Tool Layer
+  participant P as Parser
+
+  L->>M: call .auto / .narration (text, options)
+  M->>T: route to fixed mode
+  T->>P: generate_sora2_instructions(text, mode)
+  P-->>T: {shots, meta(chosen_mode, shots_count, parse_summary)}
+  T-->>M: structured result
+  M-->>L: JSON content with meta
+  L->>L: 注入 stitch_tags 并行拼接（由上游模块执行）
+```
+
+测试用例参考（不在最终输出中打印）：
+- “张三说：“快跑！”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “远处传来呼喊：“快躲起来！”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “李四大喊：“这边！”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “旁白：“他们以为安全。”” → `.auto`（含引号），`chosen_mode=dialogue`，`shots_count≈1`
+- “张三问：“你看见了吗？”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “门外有人喊：“开门！”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “王五说道：“安静。”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “陈晓低声道：“别动。”” → `.auto`，`chosen_mode=dialogue`，`shots_count≈1`
+- “画外音：“夜色深沉。”” → `.auto`（含引号），`chosen_mode=dialogue`，`shots_count≈1`
+- “雨夜里，路灯残影在水面摇晃。” → `.narration`，`chosen_mode=narration`，`shots_count≈1~3（依限额）`
