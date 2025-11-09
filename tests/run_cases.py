@@ -51,6 +51,20 @@ def run_file_cases():
 def main():
     run_inline_cases()
     run_file_cases()
+    # 针对“测试文稿.md”强制旁白模式的专项验证
+    story_path = os.path.join(os.path.dirname(__file__), "测试文稿.md")
+    if os.path.exists(story_path):
+        with open(story_path, "r", encoding="utf-8") as f:
+            t = f.read()
+        res = generate({"text": t, "narration_limit": 3, "mode": "narration"})
+        assert isinstance(res, dict) and "shots" in res and isinstance(res["shots"], list) and len(res["shots"]) >= 1
+        shots = res["shots"]
+        assert len(shots) <= 3, "测试文稿 旁白镜头数量不应超过 3"
+        for s in shots:
+            d = s.get("dialogue", {})
+            assert d.get("character") == "旁白", "测试文稿 角色应为旁白"
+            assert d.get("tone") in ("voice-over", "旁白"), "测试文稿 语气应为 voice-over"
+        print(f"\n=== Story Doc 测试文稿.md ===\nOutput (shots count): {len(res['shots'])}")
 
 if __name__ == "__main__":
     main()

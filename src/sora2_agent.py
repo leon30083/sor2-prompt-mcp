@@ -326,7 +326,12 @@ def slugify(text: str) -> str:
     return text.lower() or "line"
 
 
-def generate_sora2_instructions(raw_text: str, default_seconds: str = "4", narration_limit: int = 3) -> List[Dict]:
+def generate_sora2_instructions(
+    raw_text: str,
+    default_seconds: str = "4",
+    narration_limit: int = 3,
+    mode: str = "auto",
+) -> List[Dict]:
     text = normalize_text(raw_text)
 
     # 无对话→旁白 VO 模式：不存在引号或“角色+冒号+引号”结构时，按分句生成旁白镜头
@@ -337,7 +342,7 @@ def generate_sora2_instructions(raw_text: str, default_seconds: str = "4", narra
         if re.search(r"[\u4e00-\u9fa5]{1,6}[：:]\s*“[^”]+”", t):
             return True
         # 2) 引号内文本长度>=3 且 前文含“说/问/喊/道”等动词线索
-        verb_hint = re.compile(r"(说|道|问|喊|叫|答|叹|嘀咕|低声|大喊|高喊|叫道|说道|问道)[：:]?\s*$")
+        verb_hint = re.compile(r"(说|道|问|喊|答|叹|嘀咕|低声|大喊|高喊|叫道|说道|问道)[：:]\s*$")
         for m in re.finditer(r"“([^”]+)”", t):
             content = m.group(1)
             if len(content) >= 3:
@@ -353,6 +358,37 @@ def generate_sora2_instructions(raw_text: str, default_seconds: str = "4", narra
         import re
         parts = re.split(r"[。！？；…\n]+", t)
         return [p.strip() for p in parts if p and p.strip()]
+
+    # 强制旁白模式：无论是否存在引号或动词线索，全部按旁白处理
+    if str(mode).lower() == "narration":
+        lines = split_sentences(text)
+        try:
+            limit = max(1, int(narration_limit))
+        except Exception:
+            limit = 3
+        lines = lines[:limit]
+        shots: List[Dict] = []
+        for idx, line in enumerate(lines, start=1):
+            character = "旁白"
+            ctx = line
+            tone = "voice-over"
+            cine = guess_cinematography(ctx, character)
+            perf = guess_performance(ctx, tone)
+            desc = build_description(character, line, ctx)
+            shot_id = f"shot_{idx:02d}_{slugify(character)}"
+            shots.append({
+                "shot_id": shot_id,
+                "description": desc,
+                "api_call": {"seconds": default_seconds},
+                "cinematography": cine,
+                "performance": perf,
+                "dialogue": {
+                    "character": character,
+                    "line": line,
+                    "tone": tone
+                }
+            })
+        return shots
 
     if not has_dialogue_patterns(text):
         lines = split_sentences(text)
@@ -487,7 +523,15 @@ def cli():
             "汤小团瞬间反应过来，压低声音道，“我们又穿越了！孟虎，你这乌鸦嘴，刚还在博物馆说想看看真的古代战场长什么样！”\n"
             "“我哪知道摸一下锅的碎片，就能买到‘沉浸式体验’的VIP站票啊！” 孟虎哭丧着脸，揉着被硌得生疼的屁股，“这体验也太真实了吧？连个新手教程都没有！差评！”"
         )
-    res = generate_sora2_instructions(sample, default_seconds=args.seconds)
+    # CLI 支持旁白参数（可选）
+    parser.add_argument("--narration_limit", help="旁白模式镜头上限", default="3")
+    parser.add_argument("--mode", help="解析模式：auto|narration", default="auto")
+    res = generate_sora2_instructions(
+        sample,
+        default_seconds=args.seconds,
+        narration_limit=int(str(getattr(args, "narration_limit", "3"))),
+        mode=str(getattr(args, "mode", "auto")).lower(),
+    )
     print(to_json(res))
 
 

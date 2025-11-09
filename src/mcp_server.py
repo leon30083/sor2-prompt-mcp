@@ -30,7 +30,8 @@ def list_tools_ndjson() -> Dict[str, Any]:
                     "properties": {
                         "text": {"type": "string"},
                         "default_seconds": {"type": "string"},
-                        "narration_limit": {"type": "string"}
+                        "narration_limit": {"type": "string"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"}
                     },
                     "required": ["text"]
                 }
