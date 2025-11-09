@@ -29,7 +29,8 @@ def list_tools_ndjson() -> Dict[str, Any]:
                     "type": "object",
                     "properties": {
                         "text": {"type": "string"},
-                        "default_seconds": {"type": "string"}
+                        "default_seconds": {"type": "string"},
+                        "narration_limit": {"type": "string"}
                     },
                     "required": ["text"]
                 }
@@ -50,7 +51,8 @@ def tools_list() -> Dict[str, Any]:
                     "type": "object",
                     "properties": {
                         "text": {"type": "string", "description": "中文剧本文本"},
-                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"}
+                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"}
                     },
                     "required": ["text"]
                 }

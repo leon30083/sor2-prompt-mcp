@@ -37,6 +37,14 @@ def run_file_cases():
         assert isinstance(res, dict) and "shots" in res and isinstance(res["shots"], list) and len(res["shots"]) >= 1
         first = res["shots"][0]
         assert "dialogue" in first and "character" in first["dialogue"] and "line" in first["dialogue"]
+        # 纯旁白用例断言：case11 应全部为旁白且 tone 为 voice-over，数量不超过 3
+        if os.path.basename(path) == "case11.md":
+            shots = res["shots"]
+            assert len(shots) <= 3, "旁白镜头数量不应超过 3"
+            for s in shots:
+                d = s.get("dialogue", {})
+                assert d.get("character") == "旁白", "case11 角色应为旁白"
+                assert d.get("tone") in ("voice-over", "旁白"), "case11 语气应为 voice-over"
         print(f"\n=== File Case {os.path.basename(path)} ===\nOutput (shots count): {len(res['shots'])}")
 
 

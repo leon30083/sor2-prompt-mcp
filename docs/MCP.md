@@ -170,12 +170,12 @@ sequenceDiagram
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"Trae","version":"1.0"}}}
 {"jsonrpc":"2.0","method":"notifications/initialized"}
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
-{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"sora2.agent.generate","arguments":{"text":"李四大喊：“这边！”","default_seconds":"4"}}}
+{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"sora2.agent.generate","arguments":{"text":"李四大喊：“这边！”","default_seconds":"4","narration_limit":"3"}}}
 ```
 
 预期返回摘要：
 - `initialize`：`result.protocolVersion="2024-11-05"`，含 `serverInfo/capabilities.tools`。
-- `tools/list`：`result.tools[0].name="sora2.agent.generate"`，`inputSchema.required=["text"]`。
+- `tools/list`：`result.tools[0].name="sora2.agent.generate"`，`inputSchema.required=["text"]`；`properties` 包含可选 `default_seconds` 与 `narration_limit`（字符串）。
 - `tools/call`：`result.content[0].type="text"`，`text` 字段为 JSON 字符串，包含 `"shots": [...]` 且 `dialogue.line="这边！"`。
 
 备注（兼容 Trae 校验）：
@@ -187,13 +187,17 @@ sequenceDiagram
 
 ```powershell
 $t = Get-Content "tests/测试文稿.md" -Raw
-Write-Output (@"{""jsonrpc"":""2.0"",""id"":3,""method"":""tools/call"",""params"":{""name"":""sora2.agent.generate"",""arguments"":{""text"":""$t"",""default_seconds"":""4""}}}@") | python -m src.mcp_server > tests/shots_测试文稿.json
+Write-Output (@"{""jsonrpc"":""2.0"",""id"":3,""method"":""tools/call"",""params"":{""name"":""sora2.agent.generate"",""arguments"":{""text"":""$t"",""default_seconds"":""4"",""narration_limit"":""3""}}}@") | python -m src.mcp_server > tests/shots_测试文稿.json
 ```
 
 - 直接 CLI（不经 MCP）：
 
 ```powershell
 python -m src.sora2_agent --text_file tests/测试文稿.md --seconds 4 > tests/shots_测试文稿.json
+
+### 旁白模式说明
+- 当文本中无对话结构（如中文引号或“角色: 引号台词”）时，自动进入旁白 VO 模式。
+- 旁白将按句切分，默认最多生成 3 个镜头（可通过 `narration_limit` 控制）。
 ```
 
 - 预期：生成的 `tests/shots_测试文稿.json` 含 `shots` 数组；若为空请检查输入文本编码为 UTF-8。

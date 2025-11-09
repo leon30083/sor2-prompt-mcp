@@ -42,12 +42,17 @@
 将 `tests/测试文稿.md` 处理并保存到 `tests/shots_测试文稿.json`：
 ```powershell
 $t = Get-Content "tests/测试文稿.md" -Raw
-Write-Output (@"{""jsonrpc"":""2.0"",""id"":3,""method"":""tools/call"",""params"":{""name"":""sora2.agent.generate"",""arguments"":{""text"":""$t"",""default_seconds"":""4""}}}@") | python -m src.mcp_server > tests/shots_测试文稿.json
+Write-Output (@"{""jsonrpc"":""2.0"",""id"":3,""method"":""tools/call"",""params"":{""name"":""sora2.agent.generate"",""arguments"":{""text"":""$t"",""default_seconds"":""4"",""narration_limit"":""3""}}}@") | python -m src.mcp_server > tests/shots_测试文稿.json
 ```
 
 ### CLI（直接调用，不经 MCP）
 ```powershell
 python -m src.sora2_agent --text_file tests/测试文稿.md --seconds 4 > tests/shots_测试文稿.json
+
+### 旁白控制（无对话 → 旁白 VO）
+- 当输入文本中不存在引号台词或“角色: 引号台词”结构时，解析器会切换到旁白模式，将文本按句切分并生成旁白镜头。
+- 可选参数 `narration_limit`（默认 `3`）用于限制旁白分句生成的镜头数量，避免过多镜头。
+- 在 MCP `tools/call` 的 `arguments` 中传入 `narration_limit`，或在不传时使用默认值。
 ```
 
 ## 目录结构
