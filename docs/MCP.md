@@ -176,7 +176,7 @@ sequenceDiagram
 预期返回摘要：
 - `initialize`：`result.protocolVersion="2024-11-05"`，含 `serverInfo/capabilities.tools`。
 - `tools/list`：`result.tools[0].name="sora2.agent.generate"`，`inputSchema.required=["text"]`；`properties` 包含可选 `default_seconds` 与 `narration_limit`（字符串）。
- - `tools/list`：`result.tools[0].name="sora2.agent.generate"`，`inputSchema.required=["text"]`；`properties` 包含可选 `default_seconds`、`narration_limit` 与 `mode`（`auto|narration`）。
+ - `tools/list`：包含 `sora2.agent.generate`（可传 `mode=auto|narration`）、并列工具 `sora2.agent.generate.auto` 与 `sora2.agent.generate.narration`。三者的 `inputSchema.required=["text"]`；`properties` 均支持可选 `default_seconds`，其中旁白相关支持 `narration_limit`。
  - `tools/call` 返回：`{"shots": [...], "meta": {"chosen_mode": "narration|dialogue", "shots_count": N}}`
 - `tools/call`：`result.content[0].type="text"`，`text` 字段为 JSON 字符串，包含 `"shots": [...]` 且 `dialogue.line="这边！"`。
 

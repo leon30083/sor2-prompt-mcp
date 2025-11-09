@@ -1,0 +1,66 @@
+{
+  "name": "Sora2-MCP-LLM-Instruction",
+  "version": "1.0.0",
+  "description": "并列工具调用策略：默认 .auto ，明确旁白走 .narration；解析 meta 驱动并行拼接与标签。",
+  "system_prompt": "当需要从中文剧本文本生成镜头 JSON 时，直接调用并列工具。遇到不确定文本一律调用 sora2.agent.generate.auto，将模式判定交给后端。明确全旁白需求时，调用 sora2.agent.generate.narration 并设置 narration_limit。解析返回中的 meta（chosen_mode, shots_count, parse_summary）以驱动并行拼接与资源调度。",
+  "tools": [
+    {
+      "name": "sora2.agent.generate.auto",
+      "description": "自动判定对话/旁白模式并生成镜头。",
+      "parameters": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": { "type": "string", "description": "中文剧本文本" },
+          "default_seconds": { "type": "string", "description": "每镜头默认时长，字符串数字，如 \"3\"" }
+        }
+      }
+    },
+    {
+      "name": "sora2.agent.generate.narration",
+      "description": "强制旁白模式，忽略对话，按 narration_limit 限制镜头数。",
+      "parameters": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": { "type": "string", "description": "中文剧本文本" },
+          "default_seconds": { "type": "string", "description": "每镜头默认时长，字符串数字，如 \"3\"" },
+          "narration_limit": { "type": "string", "description": "旁白镜头数量上限，字符串数字，如 \"3\"" }
+        }
+      }
+    }
+  ],
+  "routing_policy": {
+    "rules": [
+      "若用户明确要求全旁白或旁白模式，选择 sora2.agent.generate.narration",
+      "否则选择 sora2.agent.generate.auto，避免在通用工具上设置 mode",
+      "不进行复杂文本理解分支；在不确定场景直接 .auto"
+    ],
+    "examples": [
+      {
+        "input": "张三说：“快跑！”",
+        "tool": "sora2.agent.generate.auto",
+        "arguments": { "text": "张三说：“快跑！”", "default_seconds": "3" }
+      },
+      {
+        "input": "夜色浓重，风声在巷口回旋。",
+        "tool": "sora2.agent.generate.narration",
+        "arguments": { "text": "夜色浓重，风声在巷口回旋。", "narration_limit": "3" }
+      }
+    ]
+  },
+  "post_processing": {
+    "stitch_tags_spec": {
+      "description": "为 shots 注入统一的拼接标签，供后续模块消费。",
+      "fields": {
+        "audio_type": { "type": "string", "enum": ["voice_over", "dialogue"] },
+        "vo_priority": { "type": "integer", "min": 0, "max": 100 },
+        "dialogue_priority": { "type": "integer", "min": 0, "max": 100 }
+      },
+      "derivation": "基于 meta.chosen_mode 与 meta.parse_summary（dialogue_count, narration_count, total_sentences）进行归一化：vo_priority = round((narration_count/total_sentences)*100)，dialogue_priority = round((dialogue_count/total_sentences)*100)。audio_type = chosen_mode == narration ? voice_over : dialogue。",
+      "defaults": {
+        "on_missing_counts": "当 parse_summary 缺失或 total_sentences=0 时，vo_priority=0，dialogue_priority=0，并保持 audio_type 依据 chosen_mode。"
+      }
+    }
+  }
+}
