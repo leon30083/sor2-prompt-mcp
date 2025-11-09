@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test outputs（默认忽略，但保留示例文件）
+tests/shots_*.json
+!tests/shots_测试文稿.json
