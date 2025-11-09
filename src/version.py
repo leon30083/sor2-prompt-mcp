@@ -1,0 +1,2 @@
+SERVER_NAME = "sora2-mcp"
+SERVER_VERSION = "1.1.1"

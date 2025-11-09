@@ -53,7 +53,8 @@ def tools_list() -> Dict[str, Any]:
                     "properties": {
                         "text": {"type": "string", "description": "中文剧本文本"},
                         "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
-                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"}
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"}
                     },
                     "required": ["text"]
                 }

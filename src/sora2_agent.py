@@ -500,6 +500,24 @@ def choose_nearest_candidate(pre_context: str, candidates: List[str]) -> Optiona
 def to_json(shots: List[Dict], ensure_ascii: bool = False) -> str:
     return json.dumps(shots, ensure_ascii=ensure_ascii, indent=2)
 
+# 文本模式自动判断：存在明确对话线索则返回 dialogue，否则 narration
+def detect_mode(text: str) -> str:
+    t = normalize_text(text)
+    # 角色+冒号+引号
+    if re.search(r"[\u4e00-\u9fa5]{1,6}[：:]\s*“[^”]+”", t):
+        return "dialogue"
+    # 引号内文本长度>=3 且 前文含“说/问/喊/道”等动词线索
+    verb_hint = re.compile(r"(说|道|问|喊|答|叹|嘀咕|低声|大喊|高喊|叫道|说道|问道)[：:]\s*$")
+    for m in re.finditer(r"“([^”]+)”", t):
+        content = m.group(1)
+        if len(content) >= 3:
+            pre = t[max(0, m.start() - 20):m.start()]
+            if verb_hint.search(pre):
+                return "dialogue"
+            if re.search(r"[。！？?!]", content):
+                return "dialogue"
+    return "narration"
+
 
 def cli():
     import argparse, sys

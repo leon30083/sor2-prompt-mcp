@@ -1,0 +1,5 @@
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"get_manifest","params":{}}
+{"jsonrpc":"2.0","id":3,"method":"version","params":{}}
+{"jsonrpc":"2.0","id":4,"method":"ping","params":{}}
+{"jsonrpc":"2.0","id":5,"method":"/sora2/agent.generate","params":{"text":"王强压低声音说：“别出声。” 远处传来呼喊：“快躲起来！” 李四大喊：“这边！”"}}
