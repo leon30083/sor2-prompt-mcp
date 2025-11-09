@@ -12,8 +12,18 @@
 - 计算：
   - `vo_priority = round((narration_count / total_sentences) * 100)`
   - `dialogue_priority = round((dialogue_count / total_sentences) * 100)`
-  - `audio_type = (meta.chosen_mode == "narration") ? "voice_over" : "dialogue"`
+- `audio_type = (meta.chosen_mode == "narration") ? "voice_over" : "dialogue"`
+ - 术语区分：旁白=VO（`dialogue.tone` 以 `voice-over` 开头）；画外音=O.S.（`dialogue.tone` 以 `off-screen` 开头），两者不可混用。
   - 缺省：当统计缺失或 `total_sentences=0`，两者取 0；`audio_type`照 `chosen_mode`。
+
+## 描述写作规范（Do / Don't）
+- Do：镜头导语化书写，包含景别/主体/动作/情境。例如：
+  - 对话：`近景特写张三，他急促喊：快跑！`
+  - 旁白：`旁白（VO）：雨夜里，路灯残影在水面摇晃。`
+  - 画外音：`画外音（O.S.）——李四：这边！`
+- Don't：机械复制原文或仅粘贴台词。例如：
+  - `快跑！`（缺少镜头导语与主体）
+  - `张三说：“快跑！”`（未转换为镜头描述，仅复述原句）
 
 ## Mermaid 流程图
 ```mermaid

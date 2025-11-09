@@ -6,7 +6,7 @@
 [
   {
     "shot_id": "shot_01_<slug>",
-    "description": "中文镜头描述",
+    "description": "中文镜头导语（转换重写，非原文照搬）",
     "api_call": { "seconds": "4" },
     "cinematography": "英文机位与运动，如 Medium close-up (MCU)",
     "performance": "英文表演描述",
@@ -20,12 +20,17 @@
 
 生成规则：
 - `shot_id`：shot_两位序号_角色或动作短语的英文slug（仅字母数字与下划线）。
-- `description`：自然中文；含角色、动作与简短场景说明。
+- `description`（必须转换重写）：用“镜头导语”风格写自然中文，包含【机位/景别 + 主体 + 动作/情绪 + 简短情境】；严禁机械复制用户原文或工具返回的台词/叙述。
+  - 对话镜头：如“近景特写张三，他急促喊：快跑！”（以动作动词重写，不照搬原句结构）。
+  - 旁白（VO）镜头：以“旁白（VO）：……”作为导语；文案应提炼叙述要点，不逐字照抄段落。
+  - 画外音（O.S.）镜头：以“画外音（O.S.）——角色：……”作为导语；画面强调在场主体反应。
+  - 若文本包含时间/氛围线索（夜色、雨夜），在导语中简要融入，如“雨夜里近景跟拍……”。
 - `api_call.seconds`：默认"4"，可根据节奏略微调整。
 - `cinematography`：根据场景与动作选择机位与运动；默认使用 MCU 保证主体清晰。
 - `performance`：结合情绪词与标点（如“！”）推断表演强度与状态。
 - `dialogue`：从引号“”内台词抽取，并归属到就近的角色名。
-  - 如遇“旁白/画外音/内心独白”，将 `dialogue.character` 设为 `旁白`，并在 `tone` 中标注 `voice-over, reflective` 等。
+- 旁白（VO）：遇到“旁白/解说/内心独白”，将 `dialogue.character` 设为 `旁白`，`tone` 标注 `voice-over, reflective`；画面可使用 B-roll / montage 以铺垫。
+- 画外音（O.S.）：遇到“画外音/屏外/O.S.”，保持原角色或设为 `画外音`，`tone` 标注 `off-screen, audible`（或 `off-screen, urgent`）；画面保持在场主体，中景/近景 + O.S. 可听，不归入 VO。
   - 如遇“画面外但在场（O.S.）”，保持角色名，`tone` 使用 `off-screen, audible` 或 `off-screen, urgent`；机位可写：
     "Medium shot on in-frame subject; off-screen voice (O.S.) audible"。
 

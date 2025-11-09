@@ -21,6 +21,18 @@ def run_inline_cases():
         assert isinstance(res, dict) and "shots" in res and isinstance(res["shots"], list) and len(res["shots"]) >= 1
         first = res["shots"][0]
         assert "dialogue" in first and "character" in first["dialogue"] and "line" in first["dialogue"]
+        # 描述校验：不得与台词完全相同；VO/O.S. 应有规范前缀；普通对话包含景别/机位提示词
+        desc = (first.get("description") or "").strip()
+        line = (first["dialogue"].get("line") or "").strip()
+        tone = (first["dialogue"].get("tone") or "").strip()
+        assert desc and desc != line, "description 不应与台词完全相同，需转换重写"
+        if tone.startswith("voice-over"):
+            assert desc.startswith("旁白（VO）："), "旁白镜头的描述需以 '旁白（VO）：' 开头"
+        elif tone.startswith("off-screen"):
+            assert "画外音（O.S.）——" in desc, "画外音镜头的描述需包含 '画外音（O.S.）——'"
+        else:
+            cues = ["近景", "中景", "特写", "全景", "跟拍", "跟随"]
+            assert any(c in desc for c in cues), "普通对话镜头描述应包含景别/机位提示词"
         print(f"\n=== Inline Case {i} ===\nInput: {t}\nOutput (shots count): {len(res['shots'])}")
 
 
@@ -37,6 +49,18 @@ def run_file_cases():
         assert isinstance(res, dict) and "shots" in res and isinstance(res["shots"], list) and len(res["shots"]) >= 1
         first = res["shots"][0]
         assert "dialogue" in first and "character" in first["dialogue"] and "line" in first["dialogue"]
+        # 对首镜头进行描述校验（与内联一致）
+        desc = (first.get("description") or "").strip()
+        line = (first["dialogue"].get("line") or "").strip()
+        tone = (first["dialogue"].get("tone") or "").strip()
+        assert desc and desc != line, "description 不应与台词完全相同，需转换重写"
+        if tone.startswith("voice-over"):
+            assert desc.startswith("旁白（VO）："), "旁白镜头的描述需以 '旁白（VO）：' 开头"
+        elif tone.startswith("off-screen"):
+            assert "画外音（O.S.）——" in desc, "画外音镜头的描述需包含 '画外音（O.S.）——'"
+        else:
+            cues = ["近景", "中景", "特写", "全景", "跟拍", "跟随"]
+            assert any(c in desc for c in cues), "普通对话镜头描述应包含景别/机位提示词"
         # 纯旁白用例断言：case11 应全部为旁白且 tone 为 voice-over，数量不超过 3
         if os.path.basename(path) == "case11.md":
             shots = res["shots"]

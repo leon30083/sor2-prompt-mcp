@@ -308,9 +308,9 @@ def guess_performance(context: str, tone: str) -> str:
 def build_description(character: str, line: str, context: str) -> str:
     # 简单中文描述模板
     if is_off_screen(context, character, line):
-        return f"画面外声音（O.S.）——{character}：{line}"
+        return f"画外音（O.S.）——{character}：{line}"
     if is_voice_over(context, character, line):
-        return f"叠加旁白（画外音）：{line}"
+        return f"旁白（VO）：{line}"
     subject = character if character not in {"不明", "未知"} else "画面主体"
     base = f"近景特写{subject}，他说：{line}"
     if "哭丧着脸" in context:
@@ -453,9 +453,9 @@ def is_voice_over(context: Optional[str], character: Optional[str], line: Option
         return True
     near = (context or "")[-20:]
     keywords = [
-        "旁白", "画外音", "解说",
+        "旁白", "解说",
         "V.O", "VO", "(V.O)",
-        "（旁白）", "（画外音）",
+        "（旁白）",
         "Narration"
     ]
     return any(k in near for k in keywords)
@@ -474,7 +474,7 @@ def is_off_screen(context: Optional[str], character: Optional[str], line: Option
     ):
         return False
     keywords = [
-        "O.S", "（O.S.）", "（画外）",
+        "O.S", "（O.S.）", "（画外）", "画外音",
         "门外", "电话那头", "屋外", "隔壁",
         "屏外", "远处", "外头", "另一间", "房外",
         "窗外", "楼下", "楼上", "对讲机里", "广播", "扩音器", "扬声器"
