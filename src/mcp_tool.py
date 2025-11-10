@@ -3,6 +3,7 @@ from typing import Dict, List
 from .sora2_agent import generate_sora2_instructions, to_json, detect_mode, summarize_text
 from .script_format import format_script, fit_segment_time
 from .json_unify import unify_shots_to_script_model
+from .user_style_adapter import map_shots_to_user_style
 
 
 def generate(payload: Dict) -> Dict:
@@ -16,13 +17,15 @@ def generate(payload: Dict) -> Dict:
     - { "shots": List[Dict] }
     """
     text = payload.get("text", "")
-    default_seconds = payload.get("default_seconds", "4")
+    # 调整默认镜头秒数为 3（旧为 4），更贴近单镜头轻量时长，避免溢出
+    default_seconds = payload.get("default_seconds", "3")
     narration_limit = payload.get("narration_limit", 3)
     composition_policy = str(payload.get("composition_policy", "neutral")).lower()
     mode = str(payload.get("mode", "auto")).lower()
     # 新增可选参数（向后兼容）
     format_enabled = payload.get("format", True)
-    segment_seconds_raw = payload.get("segment_seconds", 15)
+    # 默认分段时长改为 12s；并在后续对齐时强制不超过 15s
+    segment_seconds_raw = payload.get("segment_seconds", 12)
     time_fit_strategy = str(payload.get("time_fit_strategy", "scale")).lower()
     try:
         narration_limit = int(narration_limit)
@@ -31,6 +34,9 @@ def generate(payload: Dict) -> Dict:
     try:
         segment_seconds = int(segment_seconds_raw)
     except Exception:
+        segment_seconds = 12
+    # 强制上限 15s，避免溢出
+    if segment_seconds > 15:
         segment_seconds = 15
     if not isinstance(text, str) or not text.strip():
         return {"error": {"code": "INVALID_INPUT", "message": "text 不能为空"}}
@@ -50,9 +56,17 @@ def generate(payload: Dict) -> Dict:
             seg_shots = generate_sora2_instructions(seg.get("content", ""), default_seconds, narration_limit, mode, composition_policy=composition_policy)
             seg_shots_fitted = fit_segment_time(seg_shots, segment_seconds, time_fit_strategy, default_sec_int)
             all_shots.extend(seg_shots_fitted)
+            # 计算该分段总时长（镜头秒数之和），用于测试与审查
+            seg_total = 0
+            for sh in seg_shots_fitted:
+                try:
+                    seg_total += int(str((sh.get("api_call", {}) or {}).get("seconds")))
+                except Exception:
+                    seg_total += max(1, default_sec_int)
             seg_meta.append({
                 "title": seg.get("title", "片段"),
-                "shots_count": len(seg_shots_fitted)
+                "shots_count": len(seg_shots_fitted),
+                "total_duration": seg_total
             })
         summary = summarize_text(text)
         return {
@@ -105,6 +119,24 @@ def generate_script_model(payload: Dict) -> Dict:
     meta = res.get("meta", {})
     unified = unify_shots_to_script_model(shots, meta)
     return {"script_model": unified}
+
+
+def generate_user_style_model(payload: Dict) -> Dict:
+    """
+    用户示例样式输出：字段名为 shot_type、frame_content、sound_effect、camera_movement。
+    - 输入参数与 generate 相同。
+    - 保持镜头数量与时长不变，仅字段映射。
+    - 分段时长默认 12s，且强制不超过 15s（在 generate 内已处理）。
+    """
+    res = generate(payload)
+    if isinstance(res, dict) and "error" in res:
+        return res
+    shots = res.get("shots", [])
+    meta = res.get("meta", {})
+    mapped = map_shots_to_user_style(shots)
+    # 附带 meta，便于查看分段统计与模式
+    mapped["meta"] = meta
+    return {"user_script": mapped}
 
 
 if __name__ == "__main__":
