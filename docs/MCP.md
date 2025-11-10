@@ -162,6 +162,18 @@ sequenceDiagram
 - `PYTHONPATH` 指向本仓库根目录，确保 `src.*` 模块可导入。
 - Windows 路径包含空格时，Trae 会正确处理；如手工命令行测试，建议使用 JSON-RPC 而非 NDJSON，避免 PowerShell 管道破坏引号。
 
+## Cherry Studio 配置（一次性设置）
+
+在 Cherry Studio 的 MCP 服务器配置界面填写：
+- 命令：`python`
+- 参数：`-m src.mcp_server`
+- 工作目录（cwd）：`e:\User\Documents\GitHub\sora prompt`（替换为你的仓库绝对路径）
+- 环境变量：`PYTHONIOENCODING=utf-8`，`PYTHONPATH=e:\User\Documents\GitHub\sora prompt`
+
+说明：
+- `PYTHONPATH` 指向仓库根，保证 `src.*` 可导入。
+- 若使用虚拟环境，请先在命令行激活再启动 `python -m src.mcp_server`，或将 `cwd` 设为虚拟环境可访问的路径。
+
 ## Trae 内一键测试请求集（握手→枚举→调用）
 
 在 Trae 的 MCP 请求面板中依次发送以下四条请求：
