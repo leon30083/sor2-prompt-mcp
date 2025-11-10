@@ -9,57 +9,59 @@ param(
     [string]$GenerateConfig = "both"
 )
 
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 function Write-Info($msg){ Write-Host "[INFO] $msg" -ForegroundColor Cyan }
 function Write-Warn($msg){ Write-Host "[WARN] $msg" -ForegroundColor DarkYellow }
 function Write-ErrorMsg($msg){ Write-Host "[ERROR] $msg" -ForegroundColor Red }
 
-# 检查 Python 是否可用
-try {
-    $pythonVer = & python --version 2>$null
-} catch { $pythonVer = $null }
+# Check Python availability
+try { $pythonVer = & python --version 2>$null } catch { $pythonVer = $null }
 if(-not $pythonVer){
-    Write-ErrorMsg "未检测到 Python。请安装 Python 3.11+ 后重试。"
+    Write-ErrorMsg "Python not found. Please install Python 3.11+ and retry."
     exit 1
 }
-Write-Info "检测到 $pythonVer"
+Write-Info "Detected $pythonVer"
 
-# 可选：设置代理（用于 git clone 加速与临时环境变量）
+# Optional: set proxy for git and env (for cloning)
 if($Proxy){
-    Write-Info "设置代理为 $Proxy"
+    Write-Info "Using proxy: $Proxy"
     git config --global http.proxy $Proxy | Out-Null
     git config --global https.proxy $Proxy | Out-Null
     $env:HTTP_PROXY = $Proxy
     $env:HTTPS_PROXY = $Proxy
 }
 
-# 创建目标目录并克隆仓库
+# Ensure target directory exists
 if(!(Test-Path $TargetDir)){
-    Write-Info "创建目标目录: $TargetDir"
+    Write-Info "Create target directory: $TargetDir"
     New-Item -ItemType Directory -Path $TargetDir | Out-Null
 }
 
-Write-Info "克隆仓库: $RepoUrl -> $TargetDir (branch=$Branch)"
+Write-Info "Clone repo: $RepoUrl -> $TargetDir (branch=$Branch)"
 git clone --branch $Branch $RepoUrl $TargetDir
 if($LASTEXITCODE -ne 0){
-    Write-ErrorMsg "git clone 失败，请检查网络或代理设置。"
+    Write-ErrorMsg "git clone failed. Check network or proxy settings."
     exit 1
 }
 
-# 可选：创建并激活虚拟环境
+# Optional: create and activate venv
 if($UseVenv){
-    Write-Info "创建虚拟环境 .venv 并尝试激活"
+    Write-Info "Create virtual environment .venv and try activating"
     Push-Location $TargetDir
     python -m venv .venv
     if(Test-Path ".\.venv\Scripts\Activate.ps1"){
         & ".\.venv\Scripts\Activate.ps1"
-        Write-Info "已激活虚拟环境"
+        Write-Info "Virtual environment activated"
     } else {
-        Write-Warn "未找到虚拟环境激活脚本，继续后续步骤"
+        Write-Warn "Activate script not found. Continue without venv activation."
     }
     Pop-Location
 }
 
-# 生成 MCP 客户端配置片段（Trae / Cherry Studio）
+# Generate MCP client config snippets (Trae / Cherry Studio)
 $scriptDir = Join-Path $TargetDir "scripts"
 if(!(Test-Path $scriptDir)){
     New-Item -ItemType Directory -Path $scriptDir | Out-Null
@@ -92,20 +94,20 @@ $cherryConfig = @{
 if($GenerateConfig -in @("trae","both")){
     $traeFile = Join-Path $scriptDir "trae_mcp_sora2.json"
     Set-Content -Path $traeFile -Value $traeConfig -Encoding UTF8
-    Write-Info "已生成 Trae 配置片段: $traeFile"
+    Write-Info "Generated Trae config snippet: $traeFile"
 }
 if($GenerateConfig -in @("cherry","both")){
     $cherryFile = Join-Path $scriptDir "cherry_mcp_sora2.json"
     Set-Content -Path $cherryFile -Value $cherryConfig -Encoding UTF8
-    Write-Info "已生成 Cherry Studio 配置片段: $cherryFile"
+    Write-Info "Generated Cherry Studio config snippet: $cherryFile"
 }
 
-Write-Host "" 
-Write-Info "快速验证："
-Write-Host "  1) 在目标目录启动：cd `"$TargetDir`"; python -m src.mcp_server" -ForegroundColor Yellow
-Write-Host "  2) 在客户端发送 JSON-RPC：initialize / tools/list / tools/call" -ForegroundColor Yellow
-Write-Host "  3) Cherry/Trae 中将生成的 JSON 片段复制到设置中的 MCP 服务器配置处" -ForegroundColor Yellow
+Write-Host ""
+Write-Info "Quick verification:"
+Write-Host "  1) Start server: cd `"$TargetDir`"; python -m src.mcp_server" -ForegroundColor Yellow
+Write-Host "  2) Send JSON-RPC: initialize / tools/list / tools/call" -ForegroundColor Yellow
+Write-Host "  3) Copy generated JSON into Trae/Cherry MCP settings" -ForegroundColor Yellow
 
-Write-Host "" 
-Write-Info "完成。"
+Write-Host ""
+Write-Info "Done."
 exit 0
