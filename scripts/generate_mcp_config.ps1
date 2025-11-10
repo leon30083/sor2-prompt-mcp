@@ -3,21 +3,25 @@ param(
     [ValidateSet("trae","cherry","both")]
     [string]$GenerateConfig = "both",
     [ValidateSet("txt","json")]
-    [string]$Format = "txt",
+    [string]$Format = "json",
     [string]$OutputFile = "mcp_config_sora2.txt"
 )
 
 $ErrorActionPreference = "Stop"
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OutputEncoding = [System.Text.Encoding]::UTF8
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
+try { $OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 
 function Write-Info($msg){ Write-Host "[INFO] $msg" -ForegroundColor Cyan }
 function Write-ErrorMsg($msg){ Write-Host "[ERROR] $msg" -ForegroundColor Red }
 
-$RepoRoot = Split-Path -Parent $PSScriptRoot
+$ScriptDir = $PSScriptRoot
+if(-not $ScriptDir -or $ScriptDir -eq ""){
+    $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+$RepoRoot = Split-Path -Parent $ScriptDir
 if(-not (Test-Path (Join-Path $RepoRoot "src\mcp_server.py"))){
     Write-ErrorMsg "Run this script inside the cloned repository (src/mcp_server.py not found)."
-    exit 1
+    return
 }
 
 $traeConfigObj = @{
@@ -53,13 +57,13 @@ $writeNoBom = {
 if($Format -eq "json"){
     if($GenerateConfig -in @("trae","both")){
         $traeJson = ($traeConfigObj | ConvertTo-Json -Depth 6)
-        $traePath = Join-Path $PSScriptRoot ("trae_mcp_{0}.json" -f $MCPName)
+        $traePath = Join-Path $ScriptDir ("trae_mcp_{0}.json" -f $MCPName)
         & $writeNoBom $traePath $traeJson
         Write-Info "Generated Trae JSON: $traePath"
     }
     if($GenerateConfig -in @("cherry","both")){
         $cherryJson = ($cherryConfigObj | ConvertTo-Json -Depth 6)
-        $cherryPath = Join-Path $PSScriptRoot ("cherry_mcp_{0}.json" -f $MCPName)
+        $cherryPath = Join-Path $ScriptDir ("cherry_mcp_{0}.json" -f $MCPName)
         & $writeNoBom $cherryPath $cherryJson
         Write-Info "Generated Cherry JSON: $cherryPath"
     }
@@ -78,10 +82,10 @@ else {
         $lines += "```"
         $lines += ""
     }
-    $outPath = Join-Path $PSScriptRoot $OutputFile
+    $outPath = Join-Path $ScriptDir $OutputFile
     & $writeNoBom $outPath ($lines -join [Environment]::NewLine)
     Write-Info "Generated TXT with JSON blocks: $outPath"
 }
 
 Write-Info "Done."
-exit 0
+return
