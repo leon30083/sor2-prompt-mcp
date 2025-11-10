@@ -1,5 +1,7 @@
 # Sora2 Prompt MCP Server
 
+重要声明：本仓库不再提供任何安装/生成脚本；请按照 `docs/MCP.md` 的“手动配置”章节进行客户端配置（Trae/Cherry）。
+
 一个遵循 MCP（Model Context Protocol）标准的 stdin/stdout 服务器，提供中文剧本文本到 Sora2 指令（shots JSON）的解析工具 `sora2.agent.generate`。
 
 - 主要功能：角色识别、O.S./VO 判定、摄影机与表演建议、台词抽取与排序。
@@ -9,22 +11,9 @@
 - 需要 Python 3.11+。
 - Windows 11 建议设置环境变量：`PYTHONIOENCODING=utf-8`。
 
-### Trae 配置（mcpServers）
-将以下配置添加到 Trae 设置中：
-```json
-{
-  "mcpServers": {
-    "sora2": {
-      "command": "python",
-      "args": ["-m", "src.mcp_server"],
-      "env": {
-        "PYTHONIOENCODING": "utf-8",
-        "PYTHONPATH": "e:\\User\\Documents\\GitHub\\sora prompt"
-      }
-    }
-  }
-}
-```
+### 客户端手动配置
+手动配置请参考 `docs/MCP.md` 的“手动配置”章节（涵盖 Trae 与 Cherry），本 README 不再重复示例以避免冗余与漂移。
+
 
 ## 使用方法
 

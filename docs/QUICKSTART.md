@@ -77,59 +77,30 @@ flowchart LR
 - 快速原则：相邻镜头至少在景别/机位/主体局部/运动之一发生变化，避免视觉重复。
 - 英文 cinematography 可在后一个镜头追加不同修饰：`static locked-off` / `slow lateral pan` / `slow push-in` / `subtle handheld` / `tilt up/down`。
 - 中文 description 可追加提示：`（画面静态锁定）/（镜头缓慢横移）/（镜头缓慢推入）/（轻微手持晃动）/（镜头轻微上/下摇）`。
-## 6. 自动安装脚本（Windows 10 / Cherry Studio / Trae）
-本仓库提供一键安装脚本，自动完成：克隆仓库、生成 MCP 配置片段（Trae/Cherry）。
+## 6. 手动安装（Windows 10 / Cherry Studio / Trae）
+本仓库支持手动克隆与环境准备，推荐按以下步骤：
 
-命令示例（PowerShell）：
-```
-.\n+scripts\install_sora2_mcp.ps1 -TargetDir "D:\Dev\sor2-prompt-mcp" -Branch "feat/composition-policy" -Proxy "http://127.0.0.1:7890" -GenerateConfig both
-```
+步骤：
+- 克隆仓库：`git clone -b feat/composition-policy https://github.com/leon30083/sor2-prompt-mcp.git`
+- 进入目录：`cd sor2-prompt-mcp`
+- 可选：创建虚拟环境并激活：`python -m venv .venv && .\.venv\Scripts\Activate.ps1`
+- 启动 MCP 服务器：`python -m src.mcp_server`
 
-参数说明：
-- `-TargetDir`：安装目录（默认 `~\Documents\sor2-prompt-mcp`）
-- `-Branch`：分支（默认 `feat/composition-policy`，也可设置为 `main`）
-- `-Proxy`：可选，Clash 本地代理如 `http://127.0.0.1:7890`
-- `-UseVenv`：可选，创建并激活虚拟环境
-- `-GenerateConfig`：`trae|cherry|both`，生成相应的配置片段
-- `-MCPName`：MCP 名称（默认 `sora2`）
-
-生成结果：
-- `scripts\trae_mcp_sora2.json`：可粘贴到 Trae 设置中的 `mcpServers`。
-- `scripts\cherry_mcp_sora2.json`：可粘贴到 Cherry Studio 的 MCP 服务器配置界面（命令、参数、cwd、env）。
+手动配置（推荐）：请参考 `docs/MCP.md` 的“手动配置”章节（统一维护 Trae 与 Cherry 的配置示例）。
 
 快速验证：
-- 在安装目录运行：`python -m src.mcp_server`
+- 在仓库根目录运行：`python -m src.mcp_server`
 - 在客户端发送 JSON-RPC：`initialize`、`tools/list`、`tools/call`
 
 ```mermaid
 flowchart TD
-    A[执行安装脚本] --> B[克隆仓库到目标目录]
-    B --> C{是否启用虚拟环境}
-    C -- 是 --> C1[创建并激活 .venv]
-    C -- 否 --> D
-    C1 --> D[生成 Trae/Cherry 配置 JSON]
-    D --> E[启动 MCP 服务器]
-    E --> F[客户端发送 initialize/tools/list/tools/call]
-    F --> G[返回 shots JSON 视为完成]
+    A[克隆仓库到目标目录] --> B{是否启用虚拟环境}
+    B -- 是 --> B1[创建并激活 .venv]
+    B -- 否 --> C
+    B1 --> C[完成环境准备]
+    C --> D[手动配置 Trae/Cherry]
+    D --> E[客户端发送 initialize/tools/list/tools/call]
+    E --> F[返回 shots JSON 视为完成]
 ```
-## 7. 仅生成本机配置（TXT）（推荐简化）
-如果你已经手动克隆了仓库，并且只需要生成本机可用的 MCP 配置片段（不做克隆与环境准备），使用：
-
-```
-scripts\generate_mcp_config.ps1 -GenerateConfig both -MCPName "sora2" -Format txt -OutputFile "mcp_config_sora2.txt"
-```
-
-说明：
-- 在仓库根目录执行此脚本；脚本会在 `scripts` 同目录输出 `mcp_config_sora2.txt`。
-- TXT 文件内包含两段 JSON 代码块（```json ... ```），直接复制到 IDE 设置即可。
-- 默认输出 UTF-8，且脚本仅使用英文提示，避免 Win10 控制台乱码。
-
-若希望直接得到两个独立的 JSON 文件（可复制或导入），使用：
-
-```
-scripts\generate_mcp_config.ps1 -GenerateConfig both -MCPName "sora2" -Format json
-```
-
-生成结果：
-- `scripts\trae_mcp_sora2.json`
-- `scripts\cherry_mcp_sora2.json`
+## 7. 手动配置示例（统一入口）
+请直接参考 `docs/MCP.md` 的“手动配置”章节。本页面不再重复示例，以降低文档维护成本并避免配置漂移。
