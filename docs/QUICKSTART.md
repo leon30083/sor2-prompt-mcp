@@ -112,3 +112,14 @@ flowchart TD
     E --> F[客户端发送 initialize/tools/list/tools/call]
     F --> G[返回 shots JSON 视为完成]
 ```
+## 7. 仅生成本机配置（TXT）（推荐简化）
+如果你已经手动克隆了仓库，并且只需要生成本机可用的 MCP 配置片段（不做克隆与环境准备），使用：
+
+```
+scripts\generate_mcp_config.ps1 -GenerateConfig both -MCPName "sora2" -OutputFile "mcp_config_sora2.txt"
+```
+
+说明：
+- 在仓库根目录执行此脚本；脚本会在 `scripts` 同目录输出 `mcp_config_sora2.txt`。
+- TXT 文件内包含两段 JSON：Trae 的 `mcpServers` 配置与 Cherry 的 MCP JSON，直接复制到 IDE 设置即可。
+- 默认输出 UTF-8，且脚本仅使用英文提示，避免 Win10 控制台乱码。
