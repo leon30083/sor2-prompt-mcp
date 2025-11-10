@@ -54,3 +54,26 @@ flowchart LR
 - Don't：直接复制原文或仅粘贴台词。例如：
   - `快跑！`（缺少镜头导语与主体）
   - `张三说：“快跑！”`（未转换为镜头描述，仅复述原句）
+## 构图偏好快速指南
+当需要偏好单主体/无人镜头时，将 `composition_policy` 设为 `mono` 或 `mono_or_empty`。
+
+不可拆分多人场景的 Fallback：
+- 英文 cinematography：
+  - `Extreme wide establishing; partial framing on lower bodies/feet, subjects distant`
+  - `Extreme wide establishing; silhouette framing, subjects distant`
+  - `Back view framing; high angle, subjects distant`
+  - `Partial framing on hands/shoulders; wide, subjects distant`
+  - `Skyline establishing; ambient-only emphasis; subjects implied, not emphasized`
+- 中文 description：
+  - 远景或局部特写脚步，画面内齐声说：{台词}
+  - 极远景剪影或背影，不强调人数，画面内齐声说：{台词}
+  - 局部特写手部或肩部，画面内齐声说：{台词}
+  - 城市天际线远景，声音保留，画面内齐声说：{台词}
+  - 环境空镜与物件特写，声音保留，画面内齐声说：{台词}
+
+注意：中文描述避免出现“众人/两人/群像”等词；英文 cinematography 避免 `group`/`two-shot` 等词。
+
+## 相邻镜头避免重复（Diversity）
+- 快速原则：相邻镜头至少在景别/机位/主体局部/运动之一发生变化，避免视觉重复。
+- 英文 cinematography 可在后一个镜头追加不同修饰：`static locked-off` / `slow lateral pan` / `slow push-in` / `subtle handheld` / `tilt up/down`。
+- 中文 description 可追加提示：`（画面静态锁定）/（镜头缓慢横移）/（镜头缓慢推入）/（轻微手持晃动）/（镜头轻微上/下摇）`。

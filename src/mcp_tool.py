@@ -8,7 +8,7 @@ def generate(payload: Dict) -> Dict:
     MCP 工具入口：/sora2/agent.generate
 
     参数:
-    - payload: { "text": str, "default_seconds": str, "narration_limit": str|int, "mode": str }
+    - payload: { "text": str, "default_seconds": str, "narration_limit": str|int, "mode": str, "composition_policy"?: str }
 
     返回:
     - { "shots": List[Dict] }
@@ -16,6 +16,7 @@ def generate(payload: Dict) -> Dict:
     text = payload.get("text", "")
     default_seconds = payload.get("default_seconds", "4")
     narration_limit = payload.get("narration_limit", 3)
+    composition_policy = str(payload.get("composition_policy", "neutral")).lower()
     mode = str(payload.get("mode", "auto")).lower()
     try:
         narration_limit = int(narration_limit)
@@ -24,7 +25,7 @@ def generate(payload: Dict) -> Dict:
     if not isinstance(text, str) or not text.strip():
         return {"error": {"code": "INVALID_INPUT", "message": "text 不能为空"}}
     chosen_mode = "narration" if mode == "narration" else detect_mode(text)
-    shots = generate_sora2_instructions(text, default_seconds, narration_limit, mode)
+    shots = generate_sora2_instructions(text, default_seconds, narration_limit, mode, composition_policy=composition_policy)
     summary = summarize_text(text)
     return {
         "shots": shots,

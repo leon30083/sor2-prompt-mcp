@@ -25,6 +25,8 @@ flowchart TD
 - `notifications/initialized`：可忽略返回。
 - `tools/list`：返回 `name`、`description` 与 `inputSchema`；`nextCursor:""`。
 - `tools/call`：按 `name` 执行；本项目工具为 `sora2.agent.generate`。
+  - 额外可选参数：`composition_policy` 控制构图偏好（`neutral|mono|mono_or_empty`）。
+  - Fallback（多人不可拆分场景）：当 `composition_policy` 生效且文本中存在多人线索但无法拆分为多个单人镜头时，`sora2_agent` 将建议使用极远景或“局部出镜”（如仅拍脚步/手部）的低一致性方案，避免强调多人同框。
 
 ## 目录与代码风格
 - 目录建议：保持 `src/`、`docs/`、`tests/` 分层，避免交叉依赖。
@@ -39,6 +41,17 @@ flowchart TD
 - 错误处理：
   - JSON 解析失败返回 `isError: true` 与 `code: -32700`。
   - 参数错误返回 `isError: true` 与描述信息。
+ - 构图偏好：通过在 `generate_sora2_instructions` 贯穿 `composition_policy` 参数实现单人/无人镜头偏好；`guess_cinematography` 在 VO 情况下可输出空环境 B-roll，在多人语境下避免 two-shot/group 文案。
+  - 构图 Fallback：多人不可拆分时采用极远景或局部出镜（脚步/手部等），保持镜头低一致性，满足“大家一起”类语义同时不破坏单主体偏好。
+
+## 描述写作规范（Do / Don't）
+- Do：将 `description` 写成“中文镜头导语（转换重写，非原文照搬）”，包含景别/主体/动作/情境。例如：
+  - 对话：`近景特写张三，他急促喊：快跑！`
+  - 旁白：`旁白（VO）：雨夜里，路灯残影在水面摇晃。`
+  - 画外音：`画外音（O.S.）——李四：这边！`
+- Don't：直接复制原文或仅粘贴台词。例如：
+  - `快跑！`（缺少镜头导语与主体）
+  - `张三说：“快跑！”`（未转换为镜头描述，仅复述原句）
 
 ```mermaid
 sequenceDiagram

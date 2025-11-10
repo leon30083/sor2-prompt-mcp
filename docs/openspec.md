@@ -10,6 +10,7 @@
   - `cinematography`: 英文机位与运动（如`Medium close-up (MCU)`）
   - `performance`: 英文表演描述
   - `dialogue`: `{ character, line, tone }`
+  - 可选：`composition_policy`（工具调用参数），影响构图策略：`neutral|mono|mono_or_empty`。
 
 ## 功能模块
 1. 文本标准化：清理空白、统一中文引号、分句。
@@ -18,6 +19,8 @@
 4. 要素推断：关键词映射生成 `cinematography` / `performance` / `tone`。
 5. 镜头构建：封装为Sora2镜头对象，并生成连续序号与`shot_id`。
 6. 输出整形：返回JSON列表；同时生成LLM提示词版本文本。
+7. 构图策略：当 `composition_policy` 设置为 `mono` 或 `mono_or_empty` 时，摄影机与描述倾向单主体或空环境（VO），避免 two-shot/group 文案。
+8. 构图 Fallback：在多人不可拆分场景下，采用极远景或局部出镜（脚步/手部）以降低一致性，避免强调多人同框，同时保留语义（如“一起上！”）。
 
 ## 非功能要求
 - 纯Python，无外部依赖；函数尽量小且可复用；控制圈复杂度。
