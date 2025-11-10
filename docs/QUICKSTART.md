@@ -116,10 +116,20 @@ flowchart TD
 如果你已经手动克隆了仓库，并且只需要生成本机可用的 MCP 配置片段（不做克隆与环境准备），使用：
 
 ```
-scripts\generate_mcp_config.ps1 -GenerateConfig both -MCPName "sora2" -OutputFile "mcp_config_sora2.txt"
+scripts\generate_mcp_config.ps1 -GenerateConfig both -MCPName "sora2" -Format txt -OutputFile "mcp_config_sora2.txt"
 ```
 
 说明：
 - 在仓库根目录执行此脚本；脚本会在 `scripts` 同目录输出 `mcp_config_sora2.txt`。
-- TXT 文件内包含两段 JSON：Trae 的 `mcpServers` 配置与 Cherry 的 MCP JSON，直接复制到 IDE 设置即可。
+- TXT 文件内包含两段 JSON 代码块（```json ... ```），直接复制到 IDE 设置即可。
 - 默认输出 UTF-8，且脚本仅使用英文提示，避免 Win10 控制台乱码。
+
+若希望直接得到两个独立的 JSON 文件（可复制或导入），使用：
+
+```
+scripts\generate_mcp_config.ps1 -GenerateConfig both -MCPName "sora2" -Format json
+```
+
+生成结果：
+- `scripts\trae_mcp_sora2.json`
+- `scripts\cherry_mcp_sora2.json`

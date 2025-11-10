@@ -2,6 +2,8 @@ param(
     [string]$MCPName = "sora2",
     [ValidateSet("trae","cherry","both")]
     [string]$GenerateConfig = "both",
+    [ValidateSet("txt","json")]
+    [string]$Format = "txt",
     [string]$OutputFile = "mcp_config_sora2.txt"
 )
 
@@ -42,25 +44,44 @@ $cherryConfigObj = @{
     }
 }
 
-$lines = @()
-$lines += "# MCP config snippets (copy-paste into your IDE settings)"
-$lines += "# Repository path: $RepoRoot"
-$lines += ""
-
-if($GenerateConfig -in @("trae","both")){
-    $lines += "[Trae mcpServers JSON]"
-    $lines += ($traeConfigObj | ConvertTo-Json -Depth 6)
-    $lines += ""
+$writeNoBom = {
+    param($path, $content)
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($path, $content, $utf8NoBom)
 }
 
-if($GenerateConfig -in @("cherry","both")){
-    $lines += "[Cherry Studio MCP JSON]"
-    $lines += ($cherryConfigObj | ConvertTo-Json -Depth 6)
-    $lines += ""
+if($Format -eq "json"){
+    if($GenerateConfig -in @("trae","both")){
+        $traeJson = ($traeConfigObj | ConvertTo-Json -Depth 6)
+        $traePath = Join-Path $PSScriptRoot ("trae_mcp_{0}.json" -f $MCPName)
+        & $writeNoBom $traePath $traeJson
+        Write-Info "Generated Trae JSON: $traePath"
+    }
+    if($GenerateConfig -in @("cherry","both")){
+        $cherryJson = ($cherryConfigObj | ConvertTo-Json -Depth 6)
+        $cherryPath = Join-Path $PSScriptRoot ("cherry_mcp_{0}.json" -f $MCPName)
+        & $writeNoBom $cherryPath $cherryJson
+        Write-Info "Generated Cherry JSON: $cherryPath"
+    }
+}
+else {
+    $lines = @()
+    if($GenerateConfig -in @("trae","both")){
+        $lines += "```json"
+        $lines += ($traeConfigObj | ConvertTo-Json -Depth 6)
+        $lines += "```"
+        $lines += ""
+    }
+    if($GenerateConfig -in @("cherry","both")){
+        $lines += "```json"
+        $lines += ($cherryConfigObj | ConvertTo-Json -Depth 6)
+        $lines += "```"
+        $lines += ""
+    }
+    $outPath = Join-Path $PSScriptRoot $OutputFile
+    & $writeNoBom $outPath ($lines -join [Environment]::NewLine)
+    Write-Info "Generated TXT with JSON blocks: $outPath"
 }
 
-$outPath = Join-Path $PSScriptRoot $OutputFile
-Set-Content -Path $outPath -Value ($lines -join [Environment]::NewLine) -Encoding UTF8
-Write-Info "Generated config file: $outPath"
 Write-Info "Done."
 exit 0
