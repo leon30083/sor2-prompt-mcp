@@ -24,6 +24,8 @@ if(-not $LogPath -or $LogPath -eq ""){
     $LogPath = Join-Path $ScriptDir "generate_mcp_config.log"
 }
 
+try { [System.IO.File]::AppendAllText($LogPath, ("[BEGIN] " + (Get-Date).ToString() + [Environment]::NewLine)) } catch {}
+
 try { Stop-Transcript | Out-Null } catch {}
 try { Start-Transcript -Path $LogPath -Append -ErrorAction SilentlyContinue } catch {}
 if(-not (Test-Path (Join-Path $RepoRoot "src\mcp_server.py"))){
@@ -99,7 +101,9 @@ try {
 }
 catch {
     Write-ErrorMsg ("Exception: " + $_.Exception.Message)
+    try { [System.IO.File]::AppendAllText($LogPath, ("[ERROR] " + $_.Exception.Message + [Environment]::NewLine)) } catch {}
 }
 finally {
     try { Stop-Transcript | Out-Null } catch {}
+    try { [System.IO.File]::AppendAllText($LogPath, ("[END] " + (Get-Date).ToString() + [Environment]::NewLine)) } catch {}
 }
