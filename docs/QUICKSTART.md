@@ -77,3 +77,38 @@ flowchart LR
 - 快速原则：相邻镜头至少在景别/机位/主体局部/运动之一发生变化，避免视觉重复。
 - 英文 cinematography 可在后一个镜头追加不同修饰：`static locked-off` / `slow lateral pan` / `slow push-in` / `subtle handheld` / `tilt up/down`。
 - 中文 description 可追加提示：`（画面静态锁定）/（镜头缓慢横移）/（镜头缓慢推入）/（轻微手持晃动）/（镜头轻微上/下摇）`。
+## 6. 自动安装脚本（Windows 10 / Cherry Studio / Trae）
+本仓库提供一键安装脚本，自动完成：克隆仓库、生成 MCP 配置片段（Trae/Cherry）。
+
+命令示例（PowerShell）：
+```
+.\n+scripts\install_sora2_mcp.ps1 -TargetDir "D:\Dev\sor2-prompt-mcp" -Branch "feat/composition-policy" -Proxy "http://127.0.0.1:7890" -GenerateConfig both
+```
+
+参数说明：
+- `-TargetDir`：安装目录（默认 `~\Documents\sor2-prompt-mcp`）
+- `-Branch`：分支（默认 `feat/composition-policy`，也可设置为 `main`）
+- `-Proxy`：可选，Clash 本地代理如 `http://127.0.0.1:7890`
+- `-UseVenv`：可选，创建并激活虚拟环境
+- `-GenerateConfig`：`trae|cherry|both`，生成相应的配置片段
+- `-MCPName`：MCP 名称（默认 `sora2`）
+
+生成结果：
+- `scripts\trae_mcp_sora2.json`：可粘贴到 Trae 设置中的 `mcpServers`。
+- `scripts\cherry_mcp_sora2.json`：可粘贴到 Cherry Studio 的 MCP 服务器配置界面（命令、参数、cwd、env）。
+
+快速验证：
+- 在安装目录运行：`python -m src.mcp_server`
+- 在客户端发送 JSON-RPC：`initialize`、`tools/list`、`tools/call`
+
+```mermaid
+flowchart TD
+    A[执行安装脚本] --> B[克隆仓库到目标目录]
+    B --> C{是否启用虚拟环境}
+    C -- 是 --> C1[创建并激活 .venv]
+    C -- 否 --> D
+    C1 --> D[生成 Trae/Cherry 配置 JSON]
+    D --> E[启动 MCP 服务器]
+    E --> F[客户端发送 initialize/tools/list/tools/call]
+    F --> G[返回 shots JSON 视为完成]
+```
