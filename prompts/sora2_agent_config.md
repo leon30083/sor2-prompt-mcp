@@ -7,13 +7,12 @@
 
 ## 能力概览
 - 文本分段：支持“分段标记”优先；其次识别 `### 标题`；否则按空行分段并生成占位标题（片段1、片段2…）。分段标记格式：`[SEGMENT: 标题]` 或 `<!-- segment: 标题 -->`。
-- MD分段预览：当输入为原始文稿时，必须先输出分段后的 MD 代码块，且在标题前保留 `###` 前缀，形如 `### 片段1：标题`。
-- 分段指令生成：最终的 Sora2 指令以“分段后的每一个片段”为单位一一生成，禁止将整篇原稿合并为单段指令。
 - 模式识别：自动判定旁白/对话；支持强制旁白（narration）。
 - 镜头生成：根据 LLM 提示词模板（prompts/sora2_llm_prompt.md）生成 `shots`。
 - 时长对齐：分段内按策略 `scale/pad/trim` 对齐总时长至目标，默认 12s，最多 15s。
 - 字段映射：将内部字段映射到用户示例样式（`shot_type`、`frame_content`、`camera_movement`、`sound_effect`）。
 - 结构化输出：返回 `shots` 与 `meta`（含每分段 `total_duration`），或用户样式 `user_script`。
+- 原始文稿模式：当输入为“原始文稿”时，必须先输出分段后的 Markdown 预览（保留 `###`），随后按“每一个分段”为单位，分别生成多段且一一对应的 Sora2 指令，禁止对整篇原稿一次性生成单段指令。
 
 ## 输入/输出（I/O Schema）
 - 输入参数（对象）：
@@ -27,7 +26,6 @@
   - `time_fit_strategy`：时长对齐策略，`scale|pad|trim`（默认 `scale`）
 
 - 基础输出（shots 模式）：
-  - `md_preview`: 字符串，当 `format=true` 且输入为原始文稿时，包含分段后的 MD 代码块预览，保留 `###` 标题。
   - `shots`: 数组，每项示例：
     - `shot_id`: 字符串，如 `shot_01_role_slug`
     - `description`: 中文镜头导语（重写，不抄原文）
@@ -36,9 +34,6 @@
     - `performance`: 英文表演描述
     - `dialogue`: `{ character, line, tone }`
   - `meta`: `{ chosen_mode, shots_count, segments: [{title, shots_count, total_duration}], segment_seconds, time_fit_strategy, parse_summary }`
-
-- 分段指令输出（instructions）：
-  - `instructions`: 数组，按分段一一对应生成的 Sora2 指令文本（或提示词），元素示例：`{ segment_title: "片段1：开场", prompt_text: "..." }`
 
 - 用户样式输出（user_script）：
   - `user_script`: `{ shots_list, shots_count, total_duration, meta }`
@@ -54,15 +49,13 @@ flowchart TD
   B -- 包含分段标记 --> M[split_by_markers]
   B -- 含 ### 标题 --> C[split_by_titles]
   B -- 否则 --> D[auto_segment]
-  M --> E
-  C --> E[逐段生成 shots]
-  D --> E
-  E --> P[输出MD预览 (保留###标题)]
-  P --> Q[逐段生成 Sora2 指令]
+  M --> P[渲染分段 Markdown 预览(保留 ###)]
+  C --> P
+  D --> P
+  P --> E[逐段生成 shots]
   E --> F{fit_segment_time 对齐}
   F -- scale/pad/trim --> G[校正总时长: 默认12, 上限15]
   G --> H[生成基础输出 shots + meta]
-  Q --> H
   H --> I{是否需要用户样式?}
   I -- 是 --> J[user_style 映射]
   I -- 否 --> K[直接输出 shots]
@@ -75,7 +68,9 @@ flowchart TD
   - 优先识别“分段标记”单独成行：`[SEGMENT: 标题]` 或 `<!-- segment: 标题 -->`，按标记分段并以“标题”命名该段。
   - 其次，若文本包含以 `###` 开头的标题，按标题分段。
   - 否则按空行分段；若文本整体为空也会生成 `片段1`。
-  - 当输入为原始文稿：必须先输出分段后的 MD 代码块预览，按 `### 片段N：标题` 统一格式展示。
+ - 原始文稿模式（预览与生成约束）：
+   - 必须先输出分段 Markdown 预览，段标题格式统一为：`### 片段N：标题`（若无标题则 `### 片段N`）。
+   - 随后“按分段分别生成”Sora2 指令：每一分段生成若干镜头与对应指令，严禁将整篇原稿一次性合并生成单段指令。
 - 模式识别（detect_mode 替代方案）：
   - 含中文引号“”的句子或常见对话关键词（“说：”、“道：”等）→ `dialogue`
   - 明确“旁白/解说/内心独白/VO”等 → `narration`
@@ -153,19 +148,23 @@ flowchart TD
 ## 使用方式（无 MCP）
 - 步骤：
   - 1) 标准化文本（统一引号、清理空白）
-  - 2) 分段（分段标记优先，其次标题，否则空行）并输出 MD 预览（代码块，保留 `###`）
-  - 3) 逐段生成 Sora2 指令（每段一条，不合并整篇）
-  - 4) 按模式生成镜头（引用 prompts/sora2_llm_prompt.md 的生成规则与风格）
-  - 5) 时长对齐（`segment_seconds`: 默认 12，最大 15；策略默认 `scale`）
-  - 6) 输出为基础结构或用户样式结构（按需选择），并附上 `md_preview` 与 `instructions[]`
+  - 2) 分段并输出 Markdown 预览（保留 `###`，格式为 `### 片段N：标题`）
+  - 3) 按“分段”为单元分别生成 Sora2 指令（引用 prompts/sora2_llm_prompt.md 的生成规则与风格）
+  - 4) 时长对齐（`segment_seconds`: 默认 12，最大 15；策略默认 `scale`）
+  - 5) 输出为基础结构或用户样式结构（按需选择）
+
+- 分段 Markdown 预览示例：
+```md
+### 片段1：开场
+风声呼啸……
+
+### 片段2：转场
+远处火把摇曳……
+```
 
 - 输出示例（用户样式）：
 ```json
 {
-  "md_preview": "### 片段1：开场\n风声呼啸……\n\n### 片段2：转场\n远处火把摇曳……",
-  "instructions": [
-    { "segment_title": "片段1：开场", "prompt_text": "根据片段1生成的Sora2指令..." }
-  ],
   "user_script": {
     "shots_list": [
       {
@@ -196,8 +195,9 @@ sequenceDiagram
   participant U as User
   participant A as Agent (LLM)
   U->>A: 提供 text + 参数
-  A->>A: 分段(标题/空行)与模式识别
-  A->>A: 生成 shots（按模板规则）
+  A->>A: 分段(标记/标题/空行)与模式识别
+  A->>U: 输出分段 Markdown 预览(保留 ###)
+  A->>A: 逐段生成 shots（按模板规则）
   A->>A: 时长对齐（默认12, 不超过15）
   A->>U: 返回 shots 或 user_script
 ```
