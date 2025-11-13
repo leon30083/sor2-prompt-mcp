@@ -6,7 +6,7 @@
 - 输出两类结构：基础 shots JSON 与用户样式 JSON（`shot_type`、`frame_content` 等）。
 
 ## 能力概览
-- 文本分段：优先识别 `### 标题`；否则按空行分段并生成占位标题（片段1、片段2…）。
+- 文本分段：支持“分段标记”优先；其次识别 `### 标题`；否则按空行分段并生成占位标题（片段1、片段2…）。分段标记格式：`[SEGMENT: 标题]` 或 `<!-- segment: 标题 -->`。
 - 模式识别：自动判定旁白/对话；支持强制旁白（narration）。
 - 镜头生成：根据 LLM 提示词模板（prompts/sora2_llm_prompt.md）生成 `shots`。
 - 时长对齐：分段内按策略 `scale/pad/trim` 对齐总时长至目标，默认 12s，最多 15s。
@@ -45,8 +45,10 @@
 ```mermaid
 flowchart TD
   A[输入 text + 参数] --> B{format_script 分段}
-  B -- 包含 ### 标题 --> C[split_by_titles]
+  B -- 包含分段标记 --> M[split_by_markers]
+  B -- 含 ### 标题 --> C[split_by_titles]
   B -- 否则 --> D[auto_segment]
+  M --> E
   C --> E[逐段生成 shots]
   D --> E
   E --> F{fit_segment_time 对齐}
@@ -61,7 +63,9 @@ flowchart TD
 
 ## 关键算法与规则
 - 分段规则（format_script）：
-  - 若文本包含以 `###` 开头的标题，按标题分段；否则按空行分段；若文本整体为空也会生成 `片段1`。
+  - 优先识别“分段标记”单独成行：`[SEGMENT: 标题]` 或 `<!-- segment: 标题 -->`，按标记分段并以“标题”命名该段。
+  - 其次，若文本包含以 `###` 开头的标题，按标题分段。
+  - 否则按空行分段；若文本整体为空也会生成 `片段1`。
 - 模式识别（detect_mode 替代方案）：
   - 含中文引号“”的句子或常见对话关键词（“说：”、“道：”等）→ `dialogue`
   - 明确“旁白/解说/内心独白/VO”等 → `narration`
@@ -139,7 +143,7 @@ flowchart TD
 ## 使用方式（无 MCP）
 - 步骤：
   - 1) 标准化文本（统一引号、清理空白）
-  - 2) 分段（标题优先，否则空行）
+  - 2) 分段（分段标记优先，其次标题，否则空行）
   - 3) 按模式生成镜头（引用 prompts/sora2_llm_prompt.md 的生成规则与风格）
   - 4) 时长对齐（`segment_seconds`: 默认 12，最大 15；策略默认 `scale`）
   - 5) 输出为基础结构或用户样式结构（按需选择）
