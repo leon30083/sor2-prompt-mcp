@@ -219,9 +219,9 @@ sequenceDiagram
 
 ## 分段输出结构（严格）
 - 原则：每个分段各自输出一组完整的 Sora2 指令（用户样式），禁止把所有分段合并到同一个 `user_script.shots_list`。
-- 形态A（推荐，逐段返回多对象）：
-  - 片段1 → 返回 `{ "user_script": { ... }, "meta": { segment_seconds, ... } }`
-  - 片段2 → 返回 `{ "user_script": { ... }, "meta": { segment_seconds, ... } }`
+ - 形态A（推荐，逐段返回多对象）：
+  - 片段1 → 返回 `{ "user_script": { ... } }`
+  - 片段2 → 返回 `{ "user_script": { ... } }`
   - …（每段各自独立返回）
 - 形态B（聚合概览，可选，仅供统计）：
   - 返回 `{ "meta_overview": { segments: [{ title, shots_count, total_duration }], segment_seconds, time_fit_strategy } }`
@@ -255,6 +255,14 @@ sequenceDiagram
   }
 }
 ```
+
+## MCP 工具接口（按分段返回）
+- `sora2.agent.generate.user_style.per_segment`：按分段分别输出用户样式，并附带分段 Markdown 预览
+  - 输入：同 `sora2.agent.generate.user_style`
+  - 输出：
+    - `preview_markdown`: `string`
+    - `user_scripts`: `Array<{ user_script: { shots_list, shots_count, total_duration, meta } }>`
+    - `meta_overview`: `{ segments: [...], segment_seconds, time_fit_strategy }`
 
 ## 备注
 - 不添加 `script_info` 到输出结构（按用户要求）。

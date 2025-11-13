@@ -186,6 +186,12 @@ sequenceDiagram
 - 音效与音乐（如需）：若上游允许可在 JSON 中加可选 `audio` 字段；若不允许，请将音效意图自然融入 `cinematography` 或 `performance` 文本中。
 
 示例片段（导演级增强示意）：
+
+原始文稿模式（无 `###` 标题时的分段与预览）：
+- 当输入不含 `###` 标题且 `format=true` 时，先生成分段 Markdown 预览，标题统一为 `### 片段N`（或 `### 片段N：短标题`）。
+- 随后按“每一分段”为单位，分别生成用户样式 `user_script`；每段总时长按 `segment_seconds` 与 `time_fit_strategy` 对齐（推荐 `12`，不超过 `15`）。
+- 使用工具接口：
+  - `sora2.agent.generate.user_style.per_segment` → 返回 `preview_markdown` + `user_scripts[]`（每段一个对象）。
 [
   {
     "shot_id": "shot_01_tang_closeup",

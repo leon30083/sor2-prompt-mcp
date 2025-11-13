@@ -139,6 +139,119 @@ def generate_user_style_model(payload: Dict) -> Dict:
     return {"user_script": mapped}
 
 
+def generate_user_style_per_segment(payload: Dict) -> Dict:
+    """
+    用户样式按分段分别输出：
+    - 返回 preview_markdown（保留 ###）
+    - 返回 user_scripts：数组，元素为每个分段各自的用户样式对象（含该段独立 meta）
+    - meta_overview：聚合统计，仅包含 segments 概览与时长策略
+
+    输入参数与 generate 相同，保持向后兼容。
+    """
+    text = payload.get("text", "")
+    if not isinstance(text, str) or not text.strip():
+        return {"error": {"code": "INVALID_INPUT", "message": "text 不能为空"}}
+
+    # 读取通用参数（与 generate 一致）
+    default_seconds = payload.get("default_seconds", "3")
+    narration_limit = payload.get("narration_limit", 3)
+    composition_policy = str(payload.get("composition_policy", "neutral")).lower()
+    mode = str(payload.get("mode", "auto")).lower()
+    format_enabled = payload.get("format", True)
+    segment_seconds_raw = payload.get("segment_seconds", 12)
+    time_fit_strategy = str(payload.get("time_fit_strategy", "scale")).lower()
+    try:
+        narration_limit = int(narration_limit)
+    except Exception:
+        narration_limit = 3
+    try:
+        segment_seconds = int(segment_seconds_raw)
+    except Exception:
+        segment_seconds = 12
+    if segment_seconds > 15:
+        segment_seconds = 15
+    try:
+        default_sec_int = int(str(default_seconds))
+    except Exception:
+        default_sec_int = 3
+
+    # 分段（原始文稿模式：先生成预览）
+    segments = format_script(text) if format_enabled else [{"title": "片段1", "content": text}]
+
+    # 预览 Markdown（保留 ### 标题与原文片段）
+    preview_lines = []
+    for idx, seg in enumerate(segments, start=1):
+        title = seg.get("title", f"片段{idx}")
+        # 标题统一加 ###
+        preview_lines.append(f"### {title}")
+        content = (seg.get("content", "") or "").strip()
+        if content:
+            preview_lines.append(content)
+            preview_lines.append("")  # 段落空行
+    preview_markdown = "\n".join(preview_lines).strip()
+
+    # 逐段生成并映射
+    user_scripts = []
+    overview_segments = []
+    def _subtitle(s: str) -> str:
+        t = (s or "").strip()
+        t = t.replace("\n", "").replace("\r", "")
+        # 简易提炼：取前 12 个非空字符作为短标题
+        return (t[:12] or "片段").strip()
+
+    for idx, seg in enumerate(segments, start=1):
+        seg_text = seg.get("content", "")
+        raw_title = seg.get("title", f"片段{idx}")
+        sub = _subtitle(seg_text)
+        seg_title = f"片段{idx}：{sub}"
+        # 段内模式：若强制旁白，则统一 narration；否则根据该段文本判定
+        chosen_mode = "narration" if mode == "narration" else detect_mode(seg_text)
+        seg_shots = generate_sora2_instructions(seg_text, default_seconds, narration_limit, mode, composition_policy=composition_policy)
+        seg_shots_fitted = fit_segment_time(seg_shots, segment_seconds, time_fit_strategy, default_sec_int)
+        # 统计该段总时长
+        seg_total = 0
+        for sh in seg_shots_fitted:
+            try:
+                seg_total += int(str((sh.get("api_call", {}) or {}).get("seconds")))
+            except Exception:
+                seg_total += max(1, default_sec_int)
+        # 字段映射为用户样式
+        mapped = map_shots_to_user_style(seg_shots_fitted)
+        # 统一 shot_id 形态为 segNN_shotMM
+        for j, it in enumerate(mapped.get("shots_list", []), start=1):
+            it["shot_id"] = f"seg{idx:02d}_shot{j:02d}"
+        # 注入该段独立 meta（仅一条 segments 概览）
+        mapped["meta"] = {
+            "chosen_mode": chosen_mode,
+            "segments": [{"title": seg_title, "shots_count": len(seg_shots_fitted), "total_duration": seg_total}],
+            "segment_seconds": segment_seconds,
+            "time_fit_strategy": time_fit_strategy
+        }
+        user_scripts.append({"user_script": mapped})
+        overview_segments.append({"title": seg_title, "shots_count": len(seg_shots_fitted), "total_duration": seg_total})
+
+    # 预览标题替换为含短标题形式
+    preview_lines2 = []
+    for idx, seg in enumerate(segments, start=1):
+        sub = _subtitle(seg.get("content", ""))
+        preview_lines2.append(f"### 片段{idx}：{sub}")
+        c = (seg.get("content", "") or "").strip()
+        if c:
+            preview_lines2.append(c)
+            preview_lines2.append("")
+    preview_markdown2 = "\n".join(preview_lines2).strip()
+
+    return {
+        "preview_markdown": preview_markdown2,
+        "user_scripts": user_scripts,
+        "meta_overview": {
+            "segments": overview_segments,
+            "segment_seconds": segment_seconds,
+            "time_fit_strategy": time_fit_strategy
+        }
+    }
+
+
 if __name__ == "__main__":
     # 简易命令行测试：python -m src.mcp_tool '{"text": "李四说：“到这边！”"}'
     import sys

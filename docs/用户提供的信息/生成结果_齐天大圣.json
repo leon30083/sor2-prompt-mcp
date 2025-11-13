@@ -1,0 +1,476 @@
+﻿{
+  "preview_markdown": "### 片段1：话说，天上的玉皇大帝听说\n话说，天上的玉皇大帝听说花果山有个很厉害的美猴王，就请他到天宫当了个官，还封他一个威风的名字，叫“齐天大圣”，意思就是和天一样大的圣人！\n\n### 片段2：当了齐天大圣，孙悟空可自\n当了齐天大圣，孙悟空可自由啦，天天在天宫里东逛逛西瞧瞧。有一天，他溜达到了王母娘娘的桃子园。我的天哪，那里的桃子可不一般，叫“蟠桃”，听说吃了能长生不老呢！孙悟空看着那又大又红的桃子，口水都流出来了。他趁着看园子的仙女不注意，变成一只小蜜蜂飞了进去，把熟透的大桃子吃了个饱！\n\n### 片段3：吃完了桃子，他又晃悠到了\n吃完了桃子，他又晃悠到了太上老君的炼丹房。太上老君是专门炼制神奇丹药的神仙，那些金丹吃了也能变得非常厉害。孙悟空像吃豆子一样，把一葫芦金丹全都给吃光了！\n\n### 片段4：这下可闯了大祸！王母娘娘\n这下可闯了大祸！王母娘娘发现桃子被偷了，太上老君发现金丹不见了，整个天宫都乱成了一锅粥。玉皇大帝气坏了，派出了十万天兵天将去抓孙悟空。\n\n### 片段5：可是，咱们的齐天大圣多厉\n可是，咱们的齐天大圣多厉害呀！他吃了蟠桃和金丹，力气变得更大了。他拿出金箍棒，从南天门一直打到凌霄宝殿，把那些天兵天将打得是落花流水，谁也拦不住他！\n\n### 片段6：整个天宫都被他闹得天翻地\n整个天宫都被他闹得天翻地覆！最后，玉皇大帝只好去请西天如来佛祖来帮忙。佛祖来了，他看着孙悟空，笑呵呵地跟他打了个赌，说只要孙悟空能一个跟头翻出他的手掌心，就把天宫让给他。\n\n### 片段7：孙悟空心想：“这有什么难\n孙悟空心想：“这有什么难的？”他奋力一跳，飞啊飞，飞了很久，看到远处有五根巨大的柱子，就以为是天的尽头了。他还在中间那根柱子上写下了“齐天大圣到此一游”八个大字。\n\n### 片段8：可当他得意洋洋地飞回来时\n可当他得意洋洋地飞回来时，佛祖却笑着摊开手掌。孙悟空低头一看，大吃一惊！原来他刚才写字的那五根“天柱”，竟然就是如来佛祖的五根手指头！\n\n### 片段9：孙悟空这才知道，天外有天\n孙悟空这才知道，天外有天，人外有人。他想跑，可已经来不及了。佛祖把手掌一翻，变成了一座巨大的五行山，把他牢牢地压在了山下面。就这样，爱闯祸的美猴王，暂时被关了禁闭。",
+  "user_scripts": [
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg01_shot01",
+            "shot_type": "中景",
+            "duration": 12,
+            "frame_content": "旁白（VO）：话说，天上的玉皇大帝听说花果山有个很厉害的美猴王，就请他到天宫当了个官，还封他一个威风的名字，叫“齐天大圣”，意思就是和天一样大的圣人",
+            "sound_effect": "旁白",
+            "line": "话说，天上的玉皇大帝听说花果山有个很厉害的美猴王，就请他到天宫当了个官，还封他一个威风的名字，叫“齐天大圣”，意思就是和天一样大的圣人",
+            "character": "旁白",
+            "camera_movement": "固定"
+          }
+        ],
+        "shots_count": 1,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段1：话说，天上的玉皇大帝听说",
+              "shots_count": 1,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg02_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：当了齐天大圣，孙悟空可自由啦，天天在天宫里东逛逛西瞧瞧",
+            "sound_effect": "旁白",
+            "line": "当了齐天大圣，孙悟空可自由啦，天天在天宫里东逛逛西瞧瞧",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg02_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：有一天，他溜达到了王母娘娘的桃子园（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "有一天，他溜达到了王母娘娘的桃子园",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg02_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：我的天哪，那里的桃子可不一般，叫“蟠桃”，听说吃了能长生不老呢（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "我的天哪，那里的桃子可不一般，叫“蟠桃”，听说吃了能长生不老呢",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段2：当了齐天大圣，孙悟空可自",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg03_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：吃完了桃子，他又晃悠到了太上老君的炼丹房",
+            "sound_effect": "旁白",
+            "line": "吃完了桃子，他又晃悠到了太上老君的炼丹房",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg03_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：太上老君是专门炼制神奇丹药的神仙，那些金丹吃了也能变得非常厉害（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "太上老君是专门炼制神奇丹药的神仙，那些金丹吃了也能变得非常厉害",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg03_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：孙悟空像吃豆子一样，把一葫芦金丹全都给吃光了（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "孙悟空像吃豆子一样，把一葫芦金丹全都给吃光了",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段3：吃完了桃子，他又晃悠到了",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg04_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：这下可闯了大祸",
+            "sound_effect": "旁白",
+            "line": "这下可闯了大祸",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg04_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：王母娘娘发现桃子被偷了，太上老君发现金丹不见了，整个天宫都乱成了一锅粥（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "王母娘娘发现桃子被偷了，太上老君发现金丹不见了，整个天宫都乱成了一锅粥",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg04_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：玉皇大帝气坏了，派出了十万天兵天将去抓孙悟空（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "玉皇大帝气坏了，派出了十万天兵天将去抓孙悟空",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段4：这下可闯了大祸！王母娘娘",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg05_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：可是，咱们的齐天大圣多厉害呀",
+            "sound_effect": "旁白",
+            "line": "可是，咱们的齐天大圣多厉害呀",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg05_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：他吃了蟠桃和金丹，力气变得更大了（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "他吃了蟠桃和金丹，力气变得更大了",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg05_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：他拿出金箍棒，从南天门一直打到凌霄宝殿，把那些天兵天将打得是落花流水，谁也拦不住他（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "他拿出金箍棒，从南天门一直打到凌霄宝殿，把那些天兵天将打得是落花流水，谁也拦不住他",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段5：可是，咱们的齐天大圣多厉",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg06_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：整个天宫都被他闹得天翻地覆",
+            "sound_effect": "旁白",
+            "line": "整个天宫都被他闹得天翻地覆",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg06_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：最后，玉皇大帝只好去请西天如来佛祖来帮忙（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "最后，玉皇大帝只好去请西天如来佛祖来帮忙",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg06_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：佛祖来了，他看着孙悟空，笑呵呵地跟他打了个赌，说只要孙悟空能一个跟头翻出他的手掌心，就把天宫让给他（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "佛祖来了，他看着孙悟空，笑呵呵地跟他打了个赌，说只要孙悟空能一个跟头翻出他的手掌心，就把天宫让给他",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段6：整个天宫都被他闹得天翻地",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg07_shot01",
+            "shot_type": "近景",
+            "duration": 6,
+            "frame_content": "近景特写孙悟空，他说：这有什么难的？",
+            "sound_effect": "无",
+            "line": "这有什么难的？",
+            "character": "孙悟空",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg07_shot02",
+            "shot_type": "近景",
+            "duration": 6,
+            "frame_content": "近景特写孙悟空，他说：齐天大圣到此一游（镜头缓慢横移）",
+            "sound_effect": "无",
+            "line": "齐天大圣到此一游",
+            "character": "孙悟空",
+            "camera_movement": "平移"
+          }
+        ],
+        "shots_count": 2,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "dialogue",
+          "segments": [
+            {
+              "title": "片段7：孙悟空心想：“这有什么难",
+              "shots_count": 2,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg08_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：可当他得意洋洋地飞回来时，佛祖却笑着摊开手掌",
+            "sound_effect": "旁白",
+            "line": "可当他得意洋洋地飞回来时，佛祖却笑着摊开手掌",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg08_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：孙悟空低头一看，大吃一惊（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "孙悟空低头一看，大吃一惊",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg08_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：原来他刚才写字的那五根“天柱”，竟然就是如来佛祖的五根手指头（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "原来他刚才写字的那五根“天柱”，竟然就是如来佛祖的五根手指头",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段8：可当他得意洋洋地飞回来时",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    },
+    {
+      "user_script": {
+        "shots_list": [
+          {
+            "shot_id": "seg09_shot01",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：孙悟空这才知道，天外有天，人外有人",
+            "sound_effect": "旁白",
+            "line": "孙悟空这才知道，天外有天，人外有人",
+            "character": "旁白",
+            "camera_movement": "固定"
+          },
+          {
+            "shot_id": "seg09_shot02",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：他想跑，可已经来不及了（镜头缓慢横移）",
+            "sound_effect": "旁白",
+            "line": "他想跑，可已经来不及了",
+            "character": "旁白",
+            "camera_movement": "平移"
+          },
+          {
+            "shot_id": "seg09_shot03",
+            "shot_type": "中景",
+            "duration": 4,
+            "frame_content": "旁白（VO）：佛祖把手掌一翻，变成了一座巨大的五行山，把他牢牢地压在了山下面（镜头缓慢推入）",
+            "sound_effect": "旁白",
+            "line": "佛祖把手掌一翻，变成了一座巨大的五行山，把他牢牢地压在了山下面",
+            "character": "旁白",
+            "camera_movement": "缓慢推进"
+          }
+        ],
+        "shots_count": 3,
+        "total_duration": 12,
+        "meta": {
+          "chosen_mode": "narration",
+          "segments": [
+            {
+              "title": "片段9：孙悟空这才知道，天外有天",
+              "shots_count": 3,
+              "total_duration": 12
+            }
+          ],
+          "segment_seconds": 12,
+          "time_fit_strategy": "scale"
+        }
+      }
+    }
+  ],
+  "meta_overview": {
+    "segments": [
+      {
+        "title": "片段1：话说，天上的玉皇大帝听说",
+        "shots_count": 1,
+        "total_duration": 12
+      },
+      {
+        "title": "片段2：当了齐天大圣，孙悟空可自",
+        "shots_count": 3,
+        "total_duration": 12
+      },
+      {
+        "title": "片段3：吃完了桃子，他又晃悠到了",
+        "shots_count": 3,
+        "total_duration": 12
+      },
+      {
+        "title": "片段4：这下可闯了大祸！王母娘娘",
+        "shots_count": 3,
+        "total_duration": 12
+      },
+      {
+        "title": "片段5：可是，咱们的齐天大圣多厉",
+        "shots_count": 3,
+        "total_duration": 12
+      },
+      {
+        "title": "片段6：整个天宫都被他闹得天翻地",
+        "shots_count": 3,
+        "total_duration": 12
+      },
+      {
+        "title": "片段7：孙悟空心想：“这有什么难",
+        "shots_count": 2,
+        "total_duration": 12
+      },
+      {
+        "title": "片段8：可当他得意洋洋地飞回来时",
+        "shots_count": 3,
+        "total_duration": 12
+      },
+      {
+        "title": "片段9：孙悟空这才知道，天外有天",
+        "shots_count": 3,
+        "total_duration": 12
+      }
+    ],
+    "segment_seconds": 12,
+    "time_fit_strategy": "scale"
+  }
+}
