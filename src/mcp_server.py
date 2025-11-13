@@ -3,6 +3,8 @@ import sys
 import uuid
 from typing import Any, Dict, List
 from .mcp_tool import generate as tool_generate
+from .mcp_tool import generate_script_model as tool_generate_script_model
+from .mcp_tool import generate_user_style_model as tool_generate_user_style_model
 from .version import SERVER_NAME, SERVER_VERSION
 
 # JSON-RPC 2.0 错误码映射
@@ -31,7 +33,65 @@ def list_tools_ndjson() -> Dict[str, Any]:
                         "text": {"type": "string"},
                         "default_seconds": {"type": "string"},
                         "narration_limit": {"type": "string"},
-                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"}
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "id": "/sora2/agent.generate.script_model",
+                "description": "根据中文剧本文本生成统一版剧本模型（JSON 1 风格）",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string"},
+                        "default_seconds": {"type": "string"},
+                        "narration_limit": {"type": "string"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "id": "/sora2/agent.generate.user_style",
+                "description": "根据中文剧本文本生成用户示例样式 JSON（shot_type、frame_content 等）",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string"},
+                        "default_seconds": {"type": "string"},
+                        "narration_limit": {"type": "string"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "id": "/sora2/agent.generate.user_style.per_segment",
+                "description": "按分段分别生成用户示例样式 JSON，并返回分段 Markdown 预览",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string"},
+                        "default_seconds": {"type": "string"},
+                        "narration_limit": {"type": "string"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
                     },
                     "required": ["text"]
                 }
@@ -44,7 +104,11 @@ def list_tools_ndjson() -> Dict[str, Any]:
                     "properties": {
                         "text": {"type": "string"},
                         "default_seconds": {"type": "string"},
-                        "narration_limit": {"type": "string"}
+                        "narration_limit": {"type": "string"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
                     },
                     "required": ["text"]
                 }
@@ -57,7 +121,22 @@ def list_tools_ndjson() -> Dict[str, Any]:
                     "properties": {
                         "text": {"type": "string"},
                         "default_seconds": {"type": "string"},
-                        "narration_limit": {"type": "string"}
+                        "narration_limit": {"type": "string"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "id": "/sora2/script.format",
+                "description": "仅进行剧本格式化，按标题或自动分段返回章节",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string"}
                     },
                     "required": ["text"]
                 }
@@ -80,7 +159,68 @@ def tools_list() -> Dict[str, Any]:
                         "text": {"type": "string", "description": "中文剧本文本"},
                         "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
                         "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
-                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"}
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "name": "sora2.agent.generate.script_model",
+                "title": "Sora2 指令生成（统一剧本模型）",
+                "description": "将中文剧本文本解析为统一版剧本模型 JSON",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string", "description": "中文剧本文本"},
+                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "name": "sora2.agent.generate.user_style",
+                "title": "Sora2 指令生成（用户示例样式）",
+                "description": "将中文剧本文本解析为用户示例字段名 JSON（shot_type、frame_content、sound_effect、camera_movement）",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string", "description": "中文剧本文本"},
+                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
+                    },
+                    "required": ["text"]
+                }
+            },
+            {
+                "name": "sora2.agent.generate.user_style.per_segment",
+                "title": "Sora2 指令生成（用户样式·按分段）",
+                "description": "按分段分别返回用户示例样式，并附分段 Markdown 预览",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "text": {"type": "string", "description": "中文剧本文本"},
+                        "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
+                        "mode": {"type": "string", "description": "解析模式：auto|narration（强制旁白）"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 12，最大 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
                     },
                     "required": ["text"]
                 }
@@ -94,7 +234,11 @@ def tools_list() -> Dict[str, Any]:
                     "properties": {
                         "text": {"type": "string", "description": "中文剧本文本"},
                         "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
-                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"}
+                        "narration_limit": {"type": "string", "description": "无对话时旁白镜头数量上限，默认 3"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
                     },
                     "required": ["text"]
                 }
@@ -108,8 +252,23 @@ def tools_list() -> Dict[str, Any]:
                     "properties": {
                         "text": {"type": "string", "description": "中文剧本文本"},
                         "default_seconds": {"type": "string", "description": "每镜头默认时长，字符串"},
-                        "narration_limit": {"type": "string", "description": "旁白镜头数量上限，默认 3"}
+                        "narration_limit": {"type": "string", "description": "旁白镜头数量上限，默认 3"},
+                        "composition_policy": {"type": "string", "description": "构图偏好：neutral|mono|mono_or_empty"},
+                        "format": {"type": "boolean", "description": "是否执行剧本格式化，默认 true"},
+                        "segment_seconds": {"type": "string", "description": "每段目标总时长（秒），默认 15"},
+                        "time_fit_strategy": {"type": "string", "description": "时长对齐策略：scale|trim|pad，默认 scale"}
                     },
+                    "required": ["text"]
+                }
+            }
+            ,
+            {
+                "name": "sora2.script.format",
+                "title": "剧本格式化",
+                "description": "按标题或自动分段返回章节",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {"text": {"type": "string", "description": "中文剧本文本"}},
                     "required": ["text"]
                 }
             }
@@ -151,7 +310,7 @@ def initialize() -> Dict[str, Any]:
         # 保留原有字段，增强兼容
         "session_id": str(uuid.uuid4()),
         "server": {"name": SERVER_NAME, "version": SERVER_VERSION},
-        "defaults": {"seconds": "4", "language": "zh-CN"},
+        "defaults": {"seconds": "3", "language": "zh-CN"},
         "features": {"os_keywords": True, "vo_keywords": True}
     }
 
@@ -179,6 +338,34 @@ def handle_request(req: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(res, dict) and "error" in res:
             return {"ok": False, "error": res["error"]}
         return {"ok": True, "data": res}
+    elif tool == "/sora2/agent.generate.script_model":
+        if not isinstance(payload, dict):
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
+        if "text" not in payload:
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        res = tool_generate_script_model(payload)
+        if isinstance(res, dict) and "error" in res:
+            return {"ok": False, "error": res["error"]}
+        return {"ok": True, "data": res}
+    elif tool == "/sora2/agent.generate.user_style":
+        if not isinstance(payload, dict):
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
+        if "text" not in payload:
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        res = tool_generate_user_style_model(payload)
+        if isinstance(res, dict) and "error" in res:
+            return {"ok": False, "error": res["error"]}
+        return {"ok": True, "data": res}
+    elif tool == "/sora2/agent.generate.user_style.per_segment":
+        if not isinstance(payload, dict):
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
+        if "text" not in payload:
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        from .mcp_tool import generate_user_style_per_segment as tool_generate_user_style_per_segment
+        res = tool_generate_user_style_per_segment(payload)
+        if isinstance(res, dict) and "error" in res:
+            return {"ok": False, "error": res["error"]}
+        return {"ok": True, "data": res}
     elif tool == "/sora2/agent.generate.auto":
         if not isinstance(payload, dict):
             return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
@@ -198,6 +385,16 @@ def handle_request(req: Dict[str, Any]) -> Dict[str, Any]:
         payload = dict(payload)
         payload["mode"] = "narration"
         res = tool_generate(payload)
+        if isinstance(res, dict) and "error" in res:
+            return {"ok": False, "error": res["error"]}
+        return {"ok": True, "data": res}
+    elif tool == "/sora2/script.format":
+        if not isinstance(payload, dict):
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "input 必须为对象"}}
+        if "text" not in payload:
+            return {"ok": False, "error": {"code": "SCHEMA_ERROR", "message": "缺少必填字段: text"}}
+        from .mcp_tool import format_only
+        res = format_only(payload)
         if isinstance(res, dict) and "error" in res:
             return {"ok": False, "error": res["error"]}
         return {"ok": True, "data": res}
@@ -284,6 +481,31 @@ def handle_jsonrpc(req: Dict[str, Any]) -> Dict[str, Any]:
                 # 将结构化结果以文本形式返回，兼容 MCP content
                 text_out = json.dumps(res, ensure_ascii=False)
                 return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
+            if name == "sora2.agent.generate.script_model":
+                if not isinstance(arguments, dict):
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "arguments 必须为对象")
+                if "text" not in arguments:
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+                res = tool_generate_script_model(arguments)
+                text_out = json.dumps(res, ensure_ascii=False)
+                return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
+            if name == "sora2.agent.generate.user_style":
+                if not isinstance(arguments, dict):
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "arguments 必须为对象")
+                if "text" not in arguments:
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+                res = tool_generate_user_style_model(arguments)
+                text_out = json.dumps(res, ensure_ascii=False)
+                return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
+            if name == "sora2.agent.generate.user_style.per_segment":
+                if not isinstance(arguments, dict):
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "arguments 必须为对象")
+                if "text" not in arguments:
+                    return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+                from .mcp_tool import generate_user_style_per_segment as tool_generate_user_style_per_segment
+                res = tool_generate_user_style_per_segment(arguments)
+                text_out = json.dumps(res, ensure_ascii=False)
+                return to_jsonrpc_success(id_val, {"content": [{"type": "text", "text": text_out}], "isError": False})
             if name == "sora2.agent.generate.auto":
                 if not isinstance(arguments, dict):
                     return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "arguments 必须为对象")
@@ -313,6 +535,32 @@ def handle_jsonrpc(req: Dict[str, Any]) -> Dict[str, Any]:
             if "text" not in payload:
                 return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
             res = tool_generate(payload)
+            if isinstance(res, dict) and "error" in res:
+                err = res["error"]
+                code = ERROR_CODES.get(err.get("code"), ERROR_CODES["BAD_REQUEST"]) if isinstance(err, dict) else ERROR_CODES["BAD_REQUEST"]
+                msg = err.get("message", "工具执行错误") if isinstance(err, dict) else str(err)
+                return to_jsonrpc_error(id_val, code, msg)
+            return to_jsonrpc_success(id_val, res)
+        if method == "/sora2/agent.generate.script_model":
+            payload = params if isinstance(params, dict) else {}
+            if not isinstance(payload, dict):
+                return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "params 必须为对象")
+            if "text" not in payload:
+                return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+            res = tool_generate_script_model(payload)
+            if isinstance(res, dict) and "error" in res:
+                err = res["error"]
+                code = ERROR_CODES.get(err.get("code"), ERROR_CODES["BAD_REQUEST"]) if isinstance(err, dict) else ERROR_CODES["BAD_REQUEST"]
+                msg = err.get("message", "工具执行错误") if isinstance(err, dict) else str(err)
+                return to_jsonrpc_error(id_val, code, msg)
+            return to_jsonrpc_success(id_val, res)
+        if method == "/sora2/agent.generate.user_style":
+            payload = params if isinstance(params, dict) else {}
+            if not isinstance(payload, dict):
+                return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "params 必须为对象")
+            if "text" not in payload:
+                return to_jsonrpc_error(id_val, ERROR_CODES["SCHEMA_ERROR"], "缺少必填字段: text")
+            res = tool_generate_user_style_model(payload)
             if isinstance(res, dict) and "error" in res:
                 err = res["error"]
                 code = ERROR_CODES.get(err.get("code"), ERROR_CODES["BAD_REQUEST"]) if isinstance(err, dict) else ERROR_CODES["BAD_REQUEST"]

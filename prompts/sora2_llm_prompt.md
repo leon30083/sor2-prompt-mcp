@@ -23,10 +23,39 @@
 - `description`（必须转换重写）：用“镜头导语”风格写自然中文，包含【机位/景别 + 主体 + 动作/情绪 + 简短情境】；严禁机械复制用户原文或工具返回的台词/叙述。
   - 对话镜头：如“近景特写张三，他急促喊：快跑！”（以动作动词重写，不照搬原句结构）。
   - 旁白（VO）镜头：以“旁白（VO）：……”作为导语；文案应提炼叙述要点，不逐字照抄段落。
-  - 画外音（O.S.）镜头：以“画外音（O.S.）——角色：……”作为导语；画面强调在场主体反应。
+ - 画外音（O.S.）镜头：以“画外音（O.S.）——角色：……”作为导语；画面强调在场主体反应。
   - 若文本包含时间/氛围线索（夜色、雨夜），在导语中简要融入，如“雨夜里近景跟拍……”。
+  - 构图偏好（可选）：当 composition_policy=mono 或 mono_or_empty 时，描述中避免群像/多人同框措辞，倾向单人或空镜；VO 时可采用空环境 B-roll。
 - `api_call.seconds`：默认"4"，可根据节奏略微调整。
 - `cinematography`：根据场景与动作选择机位与运动；默认使用 MCU 保证主体清晰。
+  - 构图偏好（可选）：当 composition_policy=mono 或 mono_or_empty 时，避免 two-shot/group，使用单主体 framing；VO 情况可写："Empty environment; B-roll / montage under narration (VO)"。
+  - 构图偏好 Fallback（不可拆分多人场景）：在 composition_policy 生效且无法拆分为多个单人镜头时，采用极远景或局部出镜（降低一致性，避免强调多人同框）。推荐短语：
+    - 英文 cinematography：
+      - "Extreme wide establishing; partial framing on lower bodies/feet, subjects distant"
+      - "Extreme wide establishing; silhouette framing, subjects distant"
+      - "Back view framing; high angle, subjects distant"
+      - "Partial framing on hands/shoulders; wide, subjects distant"
+      - "Skyline establishing; ambient-only emphasis; subjects implied, not emphasized"
+    - 中文 description：
+      - 远景或局部特写脚步，画面内齐声说：{台词}
+      - 极远景剪影或背影，不强调人数，画面内齐声说：{台词}
+      - 局部特写手部或肩部，画面内齐声说：{台词}
+      - 城市天际线远景，声音保留，画面内齐声说：{台词}
+      - 环境空镜与物件特写，声音保留，画面内齐声说：{台词}
+    - 示例：
+      - 输入：“他们齐声喊：上！” → cinematography 可写："Extreme wide establishing; silhouette framing, subjects distant"；description 可写：“极远景剪影或背影，不强调人数，画面内齐声说：上！”
+      - 输入：“同学们围在一起说：稳住！” → cinematography 可写："Back view framing; high angle, subjects distant"；description 可写：“局部特写手部或肩部，画面内齐声说：稳住！”
+
+相邻镜头避免重复（Diversity）：
+- 相邻的两条镜头至少在以下任一方面体现差异：
+  - 景别（近景/中景/远景）、机位（正/侧/背）、主体局部（手/肩/脚/剪影/背影）、运动（推/拉/摇/移/手持）。
+- 当英文 cinematography 前缀相同（如都以 `Extreme wide establishing` 开头），请在后一个镜头追加不同的运动/机位修饰词，例如：
+  - `static locked-off` / `slow lateral pan` / `slow push-in` / `subtle handheld` / `tilt up/down`。
+- 中文 description 同步体现差异（追加动作提示）：
+  - “（画面静态锁定）/（镜头缓慢横移）/（镜头缓慢推入）/（轻微手持晃动）/（镜头轻微上/下摇）”。
+- 示例：
+  - 第1句：“他们齐声喊：上！” → cinematography：`Extreme wide establishing; silhouette framing, subjects distant`；
+  - 第2句：“他们齐声喊：现在！” → cinematography：`Extreme wide establishing; silhouette framing, subjects distant; slow lateral pan`。
 - `performance`：结合情绪词与标点（如“！”）推断表演强度与状态。
 - `dialogue`：从引号“”内台词抽取，并归属到就近的角色名。
 - 旁白（VO）：遇到“旁白/解说/内心独白”，将 `dialogue.character` 设为 `旁白`，`tone` 标注 `voice-over, reflective`；画面可使用 B-roll / montage 以铺垫。
@@ -157,6 +186,12 @@ sequenceDiagram
 - 音效与音乐（如需）：若上游允许可在 JSON 中加可选 `audio` 字段；若不允许，请将音效意图自然融入 `cinematography` 或 `performance` 文本中。
 
 示例片段（导演级增强示意）：
+
+原始文稿模式（无 `###` 标题时的分段与预览）：
+- 当输入不含 `###` 标题且 `format=true` 时，先生成分段 Markdown 预览，标题统一为 `### 片段N`（或 `### 片段N：短标题`）。
+- 随后按“每一分段”为单位，分别生成用户样式 `user_script`；每段总时长按 `segment_seconds` 与 `time_fit_strategy` 对齐（推荐 `12`，不超过 `15`）。
+- 使用工具接口：
+  - `sora2.agent.generate.user_style.per_segment` → 返回 `preview_markdown` + `user_scripts[]`（每段一个对象）。
 [
   {
     "shot_id": "shot_01_tang_closeup",

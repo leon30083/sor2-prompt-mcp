@@ -54,3 +54,53 @@ flowchart LR
 - Don't：直接复制原文或仅粘贴台词。例如：
   - `快跑！`（缺少镜头导语与主体）
   - `张三说：“快跑！”`（未转换为镜头描述，仅复述原句）
+## 构图偏好快速指南
+当需要偏好单主体/无人镜头时，将 `composition_policy` 设为 `mono` 或 `mono_or_empty`。
+
+不可拆分多人场景的 Fallback：
+- 英文 cinematography：
+  - `Extreme wide establishing; partial framing on lower bodies/feet, subjects distant`
+  - `Extreme wide establishing; silhouette framing, subjects distant`
+  - `Back view framing; high angle, subjects distant`
+  - `Partial framing on hands/shoulders; wide, subjects distant`
+  - `Skyline establishing; ambient-only emphasis; subjects implied, not emphasized`
+- 中文 description：
+  - 远景或局部特写脚步，画面内齐声说：{台词}
+  - 极远景剪影或背影，不强调人数，画面内齐声说：{台词}
+  - 局部特写手部或肩部，画面内齐声说：{台词}
+  - 城市天际线远景，声音保留，画面内齐声说：{台词}
+  - 环境空镜与物件特写，声音保留，画面内齐声说：{台词}
+
+注意：中文描述避免出现“众人/两人/群像”等词；英文 cinematography 避免 `group`/`two-shot` 等词。
+
+## 相邻镜头避免重复（Diversity）
+- 快速原则：相邻镜头至少在景别/机位/主体局部/运动之一发生变化，避免视觉重复。
+- 英文 cinematography 可在后一个镜头追加不同修饰：`static locked-off` / `slow lateral pan` / `slow push-in` / `subtle handheld` / `tilt up/down`。
+- 中文 description 可追加提示：`（画面静态锁定）/（镜头缓慢横移）/（镜头缓慢推入）/（轻微手持晃动）/（镜头轻微上/下摇）`。
+## 6. 手动安装（Windows 10 / Cherry Studio / Trae）
+本仓库支持手动克隆与环境准备，推荐按以下步骤：
+
+步骤：
+- 克隆仓库：`git clone -b feat/composition-policy https://github.com/leon30083/sor2-prompt-mcp.git`
+- 进入目录：`cd sor2-prompt-mcp`
+- 可选：创建虚拟环境并激活：`python -m venv .venv && .\.venv\Scripts\Activate.ps1`
+- 启动 MCP 服务器：`python -m src.mcp_server`
+
+手动配置（推荐）：请参考 `docs/MCP.md` 的“手动配置”章节（统一维护 Trae 与 Cherry 的配置示例）。
+
+快速验证：
+- 在仓库根目录运行：`python -m src.mcp_server`
+- 在客户端发送 JSON-RPC：`initialize`、`tools/list`、`tools/call`
+
+```mermaid
+flowchart TD
+    A[克隆仓库到目标目录] --> B{是否启用虚拟环境}
+    B -- 是 --> B1[创建并激活 .venv]
+    B -- 否 --> C
+    B1 --> C[完成环境准备]
+    C --> D[手动配置 Trae/Cherry]
+    D --> E[客户端发送 initialize/tools/list/tools/call]
+    E --> F[返回 shots JSON 视为完成]
+```
+## 7. 手动配置示例（统一入口）
+请直接参考 `docs/MCP.md` 的“手动配置”章节。本页面不再重复示例，以降低文档维护成本并避免配置漂移。

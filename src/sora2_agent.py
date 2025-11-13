@@ -2,6 +2,101 @@ import re
 import json
 from typing import List, Dict, Optional, Tuple
 
+# Fallback 词库（安全短语，避免群像/两人/二人/two-shot/group 等禁词）
+# 英文摄影机（cinematography）选项：
+FALLBACK_CINEMATOGRAPHY_EN: List[str] = [
+    "Extreme wide establishing; partial framing on lower bodies/feet, subjects distant",
+    "Extreme wide establishing; silhouette framing, subjects distant",
+    "Back view framing; high angle, subjects distant",
+    "Partial framing on hands/shoulders; wide, subjects distant",
+    "Skyline establishing; ambient-only emphasis; subjects implied, not emphasized",
+]
+
+# 中文描述（description）选项：
+FALLBACK_DESCRIPTION_ZH: List[str] = [
+    "远景或局部特写脚步，画面内齐声说：{line}",
+    "极远景剪影或背影，不强调人数，画面内齐声说：{line}",
+    "局部特写手部或肩部，画面内齐声说：{line}",
+    "城市天际线远景，声音保留，画面内齐声说：{line}",
+    "环境空镜与物件特写，声音保留，画面内齐声说：{line}",
+]
+
+# 运动/机位修饰词（用于相邻镜头差异化后处理）
+MOVEMENT_MODIFIERS_EN: List[str] = [
+    "static locked-off",
+    "slow lateral pan",
+    "slow push-in",
+    "subtle handheld",
+    "tilt up/down"
+]
+
+MOTION_DESC_ZH: List[str] = [
+    "（画面静态锁定）",
+    "（镜头缓慢横移）",
+    "（镜头缓慢推入）",
+    "（轻微手持晃动）",
+    "（镜头轻微上/下摇）"
+]
+
+def _cine_prefix(cine: str) -> str:
+    """取英文摄影机描述的前缀用于比较（分号前一段或整体）。"""
+    if not cine:
+        return ""
+    parts = [p.strip() for p in cine.split(";")]
+    return parts[0] if parts else cine.strip()
+
+def diversify_shots(shots: List[Dict]) -> List[Dict]:
+    """相邻镜头差异化：
+    - 若相邻的 cinematography 前缀完全相同，为后一个镜头追加不同的运动/机位修饰词；
+    - 同步在中文 description 末尾附加动作提示，避免重复感。
+    保持稳定索引，不使用随机。
+    """
+    if not shots or len(shots) < 2:
+        return shots
+    out = shots[:]
+    for i in range(1, len(out)):
+        prev = out[i-1]
+        curr = out[i]
+        prev_c = _cine_prefix(prev.get("cinematography") or "")
+        curr_c = _cine_prefix(curr.get("cinematography") or "")
+        if prev_c and curr_c and prev_c == curr_c:
+            mod_idx = i % len(MOVEMENT_MODIFIERS_EN)
+            modifier = MOVEMENT_MODIFIERS_EN[mod_idx]
+            zh_mod = MOTION_DESC_ZH[mod_idx]
+            # 仅为后一个镜头追加修饰词
+            base = (curr.get("cinematography") or "").strip()
+            if modifier not in base:
+                curr["cinematography"] = (base + "; " + modifier).strip()
+            # 中文描述追加动作提示
+            desc = (curr.get("description") or "").strip()
+            if zh_mod not in desc:
+                curr["description"] = (desc + zh_mod).strip()
+    return out
+
+def _stable_index(text: str, n: int) -> int:
+    """基于输入文本的稳定索引，避免随机性；n>0。"""
+    if n <= 0:
+        return 0
+    s = 0
+    for ch in (text or ""):
+        s += ord(ch)
+    return s % n
+
+def _fallback_idx_by_keywords(text: str) -> Optional[int]:
+    """根据中文关键词优先选择 Fallback 类型，便于测试覆盖与外部显式提示。"""
+    t = text or ""
+    if "剪影" in t:
+        return 1  # silhouette
+    if "背影" in t:
+        return 2  # back view high angle
+    if ("手部" in t) or ("肩部" in t):
+        return 3  # hands/shoulders partial
+    if "天际线" in t:
+        return 4  # skyline
+    if "脚步" in t:
+        return 0  # partial feet
+    return None
+
 
 def normalize_text(text: str) -> str:
     text = text.replace('"', '“').replace("'", "’")
@@ -267,15 +362,25 @@ def guess_tone(context: str, line: str) -> str:
     return "neutral"
 
 
-def guess_cinematography(context: str, character: str) -> str:
+def guess_cinematography(context: str, character: str, composition_policy: str = "neutral") -> str:
     c = context
     if is_off_screen(context, character, None):
         # 画面保持主对象，声音来自画外
         return f"Medium shot on in-frame subject; off-screen voice (O.S.) audible"
     if is_voice_over(context, character, None):
-        # 旁白常搭配画面蒙太奇/铺垫镜头
+        # 旁白常搭配画面蒙太奇/铺垫镜头；在 mono_or_empty 下强调空环境
+        if composition_policy == "mono_or_empty":
+            return "Empty environment; B-roll / montage under narration (VO), soft dissolve transitions"
         return "B-roll / montage under narration (VO), soft dissolve transitions"
     subject = character if character not in {"不明", "未知", "旁白"} else "in-frame subject"
+    # 构图偏好：若文本出现多人/群像线索，避免两人同框，倾向单人构图
+    if composition_policy in {"mono", "mono_or_empty"}:
+        multi_cues = ["与", "和", "他们", "众人", "大家", "同学们", "二人", "两人", "三人", "群", "一行人", "一起", "齐声", "围在", "对视"]
+        if any(k in c for k in multi_cues):
+            # 当多人不可拆分时：采用低一致性的远景/局部出镜（脚步/手部/背影/剪影等），避免强调多人同框
+            kw_idx = _fallback_idx_by_keywords(c)
+            idx = kw_idx if kw_idx is not None else _stable_index(c, len(FALLBACK_CINEMATOGRAPHY_EN))
+            return FALLBACK_CINEMATOGRAPHY_EN[idx]
     if "近景" in c or "特写" in c:
         return f"Medium close-up (MCU) on '{subject}', shallow depth of field"
     if "中景" in c or "跟随" in c or "跟拍" in c:
@@ -305,13 +410,22 @@ def guess_performance(context: str, tone: str) -> str:
     return "Neutral expression, steady delivery"
 
 
-def build_description(character: str, line: str, context: str) -> str:
+def build_description(character: str, line: str, context: str, composition_policy: str = "neutral") -> str:
     # 简单中文描述模板
     if is_off_screen(context, character, line):
         return f"画外音（O.S.）——{character}：{line}"
     if is_voice_over(context, character, line):
         return f"旁白（VO）：{line}"
     subject = character if character not in {"不明", "未知"} else "画面主体"
+    # 构图偏好：描述保持单主体措辞；多人不可拆分时使用“远景/局部出镜（脚步）”的低一致性方案
+    if composition_policy in {"mono", "mono_or_empty"}:
+        group_cues = ["两人", "二人", "三人", "众人", "大家", "群像", "合影", "一行人", "一起", "齐声", "围在", "对视", "同学们"]
+        if any(cue in (context or "") for cue in group_cues):
+            combined = (context or "") + (line or "")
+            kw_idx = _fallback_idx_by_keywords(combined)
+            idx = kw_idx if kw_idx is not None else _stable_index(combined, len(FALLBACK_DESCRIPTION_ZH))
+            template = FALLBACK_DESCRIPTION_ZH[idx]
+            return template.format(line=line)
     base = f"近景特写{subject}，他说：{line}"
     if "哭丧着脸" in context:
         base = f"中景跟拍{subject}，他哭丧着脸，抱怨道：{line}"
@@ -331,6 +445,7 @@ def generate_sora2_instructions(
     default_seconds: str = "4",
     narration_limit: int = 3,
     mode: str = "auto",
+    composition_policy: str = "neutral",
 ) -> List[Dict]:
     text = normalize_text(raw_text)
 
@@ -372,9 +487,9 @@ def generate_sora2_instructions(
             character = "旁白"
             ctx = line
             tone = "voice-over"
-            cine = guess_cinematography(ctx, character)
+            cine = guess_cinematography(ctx, character, composition_policy=composition_policy)
             perf = guess_performance(ctx, tone)
-            desc = build_description(character, line, ctx)
+            desc = build_description(character, line, ctx, composition_policy=composition_policy)
             shot_id = f"shot_{idx:02d}_{slugify(character)}"
             shots.append({
                 "shot_id": shot_id,
@@ -388,7 +503,7 @@ def generate_sora2_instructions(
                     "tone": tone
                 }
             })
-        return shots
+        return diversify_shots(shots)
 
     if not has_dialogue_patterns(text):
         lines = split_sentences(text)
@@ -402,9 +517,9 @@ def generate_sora2_instructions(
             character = "旁白"
             ctx = line
             tone = "voice-over"
-            cine = guess_cinematography(ctx, character)
+            cine = guess_cinematography(ctx, character, composition_policy=composition_policy)
             perf = guess_performance(ctx, tone)
-            desc = build_description(character, line, ctx)
+            desc = build_description(character, line, ctx, composition_policy=composition_policy)
             shot_id = f"shot_{idx:02d}_{slugify(character)}"
             shots.append({
                 "shot_id": shot_id,
@@ -418,7 +533,7 @@ def generate_sora2_instructions(
                     "tone": tone
                 }
             })
-        return shots
+        return diversify_shots(shots)
 
     # 仍为对话模式：按原逻辑抽取台词
     candidates = find_candidates(text)
@@ -426,9 +541,9 @@ def generate_sora2_instructions(
     shots: List[Dict] = []
     for idx, (character, line, ctx) in enumerate(dialogues, start=1):
         tone = guess_tone(ctx, line)
-        cine = guess_cinematography(ctx, character)
+        cine = guess_cinematography(ctx, character, composition_policy=composition_policy)
         perf = guess_performance(ctx, tone)
-        desc = build_description(character, line, ctx)
+        desc = build_description(character, line, ctx, composition_policy=composition_policy)
         shot_id = f"shot_{idx:02d}_{slugify(character)}"
         shots.append({
             "shot_id": shot_id,
@@ -444,7 +559,7 @@ def generate_sora2_instructions(
                 "tone": tone
             }
         })
-    return shots
+    return diversify_shots(shots)
 
 
 def is_voice_over(context: Optional[str], character: Optional[str], line: Optional[str]) -> bool:

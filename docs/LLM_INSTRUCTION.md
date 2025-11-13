@@ -23,7 +23,36 @@
   - 画外音：`画外音（O.S.）——李四：这边！`
 - Don't：机械复制原文或仅粘贴台词。例如：
   - `快跑！`（缺少镜头导语与主体）
+
+## 构图偏好与 Fallback（不可拆分多人场景）
+- 当 composition_policy=mono 或 mono_or_empty 时：
+  - Do：在中文 description 中避免出现“众人/两人/群像”等措辞；尽量使用单主体或空镜表达。
+  - Don't：强调 two-shot/group 或暗示多人强同框。
+  - Fallback（多人不可拆分）：采用极远景或局部出镜，降低一致性，保留“齐声/一起”等语义。
+    - 英文 cinematography 推荐：
+      - "Extreme wide establishing; partial framing on lower bodies/feet, subjects distant"
+      - "Extreme wide establishing; silhouette framing, subjects distant"
+      - "Back view framing; high angle, subjects distant"
+      - "Partial framing on hands/shoulders; wide, subjects distant"
+      - "Skyline establishing; ambient-only emphasis; subjects implied, not emphasized"
+    - 中文 description 推荐：
+      - 远景或局部特写脚步，画面内齐声说：{台词}
+      - 极远景剪影或背影，不强调人数，画面内齐声说：{台词}
+      - 局部特写手部或肩部，画面内齐声说：{台词}
+      - 城市天际线远景，声音保留，画面内齐声说：{台词}
+      - 环境空镜与物件特写，声音保留，画面内齐声说：{台词}
+  - 示例：
+    - “他们齐声喊：上！” → description：“极远景剪影或背影，不强调人数，画面内齐声说：上！”；cinematography："Extreme wide establishing; silhouette framing, subjects distant"
+    - “同学们围在一起说：稳住！” → description：“局部特写手部或肩部，画面内齐声说：稳住！”；cinematography："Back view framing; high angle, subjects distant"
   - `张三说：“快跑！”`（未转换为镜头描述，仅复述原句）
+
+## 相邻镜头避免重复（Diversity）
+- 相邻镜头至少在景别/机位/主体局部/运动中变化一项，避免视觉重复：
+  - 英文 cinematography 可追加不同的运动/机位修饰词：`static locked-off` / `slow lateral pan` / `slow push-in` / `subtle handheld` / `tilt up/down`。
+  - 中文 description 追加动作提示：`（画面静态锁定）/（镜头缓慢横移）/（镜头缓慢推入）/（轻微手持晃动）/（镜头轻微上/下摇）`。
+- 示例：
+  - 第1句：“他们齐声喊：上！” → `Extreme wide establishing; silhouette framing, subjects distant`
+  - 第2句：“他们齐声喊：现在！” → `Extreme wide establishing; silhouette framing, subjects distant; slow lateral pan`
 
 ## Mermaid 流程图
 ```mermaid
