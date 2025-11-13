@@ -84,6 +84,7 @@ def map_shots_to_user_style(shots: List[Dict]) -> Dict:
         cine = sh.get("cinematography") or ""
         perf = sh.get("performance") or ""
         dlg = sh.get("dialogue") or {}
+        character = dlg.get("character") or ""
         line = dlg.get("line") or ""
         tone = dlg.get("tone") or ""
         out_list.append({
@@ -93,6 +94,7 @@ def map_shots_to_user_style(shots: List[Dict]) -> Dict:
             "frame_content": description,
             "sound_effect": _sound_effect_from_tone_perf_desc(tone, perf, description),
             "line": line,
+            "character": character,
             "camera_movement": _camera_movement_from_cine(cine)
         })
     return {

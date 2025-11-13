@@ -80,7 +80,7 @@ def test_user_mapping_fields_exist():
     assert set(us.keys()) >= {"shots_list", "shots_count", "total_duration", "meta"}
     first = us["shots_list"][0]
     # 字段名按用户示例
-    for key in ["shot_id", "shot_type", "duration", "frame_content", "sound_effect", "line", "camera_movement"]:
+    for key in ["shot_id", "shot_type", "duration", "frame_content", "sound_effect", "line", "character", "camera_movement"]:
         assert key in first
 
 
